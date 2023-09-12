@@ -403,5 +403,11 @@
         //   "reviewCategory": "tools",
         //   "tags": [ "tools" ]
         // }
+        {
+            "packageName": "@upradata/util",
+            "projectFolder": "libraries/util",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        }
     ]
 }

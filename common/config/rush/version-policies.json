@@ -103,6 +103,6 @@
         "definitionName": "lockStepVersion",
         "version": "1.0.0",
         "nextBump": "minor",
-        "mainProject": "@upradata/ts"
+        // "mainProject": "@upradata/ts"
     }
 ]
