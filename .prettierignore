@@ -76,6 +76,13 @@ dist
 *.scss.ts
 *.sass.ts
 
+lib-esm
+_bundles
+bundles
+
+# Ubuntu Nautilus metadata
+.directory
+
 # Visual Studio Code
 .vscode
 

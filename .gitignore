@@ -73,3 +73,16 @@ common/autoinstallers/*/.npmrc
 # Heft temporary files
 .cache
 .heft
+
+# mine
+temp
+lib
+lib-amd
+lib-es6
+lib-esm
+dist
+_bundles
+bundles
+
+# Ubuntu Nautilus metadata
+.directory
