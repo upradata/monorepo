@@ -3,8 +3,9 @@
  * More documentation is available on the Rush website: https://rushjs.io
  */
 {
-    "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
-    /**
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+
+  /**
    * Custom "commands" introduce new verbs for the command-line.  To see the help for these
    * example commands, try "rush --help", "rush my-bulk-command --help", or
    * "rush my-global-command --help".
