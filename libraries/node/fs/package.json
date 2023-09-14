@@ -1,0 +1,71 @@
+{
+    "name": "@upradata/fs",
+    "author": {
+        "name": "El Pupi (Upra-Data)",
+        "email": "elpupi@upradata.com",
+        "url": "https://github.com/upradata"
+    },
+    "repository": {
+        "url": "https://github.com/upradata/fs.git"
+    },
+    "license": "MIT",
+    "version": "2.0.0",
+    "description": "FS",
+    "sideEffects": false,
+    "main": "lib",
+    "types": "lib-esm",
+    "module": "lib-esm",
+    "files": [
+        "lib",
+        "lib-esm"
+    ],
+    "esm": {
+        "mainFields": [
+            "module",
+            "main"
+        ]
+    },
+    "exports-bak": {
+        ".": {
+            "import": "./lib-esm/index.js",
+            "require": "./lib/index.js"
+        },
+        "./*": {
+            "import": "./lib-esm/*",
+            "require": "./lib/*"
+        }
+    },
+    "scripts": {
+        "clean": "shx rm -rf lib lib-esm",
+        "pre:build2": "npm run clean",
+        "build2": "concurrently 'tsc -p tsconfig.lib.json' 'tsc -p tsconfig.lib-esm.json'",
+        "build": "concurrently 'tsc -p tsconfig.lib.json' 'tsc -p tsconfig.lib-esm.json'",
+        "post:build2": "npm run test && npm run e2e",
+        "watch": "npm run build:watch",
+        "build:watch": "concurrently 'tsc -p tsconfig.lib.json -w' 'tsc -p tsconfig.lib-esm.json -w' 'pnpm run copy:declaration'",
+        "test": "jest --verbose false --config jest-ut.config.js",
+        "e2e": "jest --passWithNoTests --verbose false --config jest-e2e.config.js",
+        "github-push": "npm version patch && git pushall && git pushall-tags",
+        "npm-publish": "npm run build && npm publish --access public"
+    },
+    "dependencies": {
+        "fs-extra": "^11.1.1",
+        "@upradata/util": "workspace:*",
+        "@upradata/node-util": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.1",
+        "@types/jest": "^29.5.4",
+        "@types/node": "^20.6.0",
+        "concurrently": "^8.2.1",
+        "jest": "^29.7.0",
+        "jest-environment-node": "^29.7.0",
+        "ts-jest": "^29.1.1",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.2.2"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "peersDependencies": {}
+}

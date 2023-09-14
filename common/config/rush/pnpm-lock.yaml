@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  ../../libraries/cache:
+  ../../libraries/node/cache:
     dependencies:
       '@upradata/find-up':
         specifier: workspace:*
@@ -18,7 +18,7 @@ importers:
         version: link:../template-string-style
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       fs-extra:
         specifier: ^11.1.1
         version: 11.1.1
@@ -54,8 +54,11 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  ../../libraries/csv:
+  ../../libraries/node/csv:
     dependencies:
+      '@upradata/fs':
+        specifier: workspace:*
+        version: link:../fs
       '@upradata/module':
         specifier: workspace:*
         version: link:../module
@@ -67,7 +70,7 @@ importers:
         version: link:../template-string-style
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       csvtojson:
         specifier: ^2.0.10
         version: 2.0.10
@@ -103,7 +106,7 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  ../../libraries/find-up:
+  ../../libraries/node/find-up:
     dependencies:
       '@upradata/node-util':
         specifier: workspace:*
@@ -113,7 +116,7 @@ importers:
         version: link:../template-string-style
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       fs-extra:
         specifier: ^11.1.1
         version: 11.1.1
@@ -146,14 +149,54 @@ importers:
         specifier: ^10.9.1
         version: 10.9.1(@types/node@20.6.0)(typescript@5.2.2)
 
-  ../../libraries/json:
+  ../../libraries/node/fs:
+    dependencies:
+      '@upradata/node-util':
+        specifier: workspace:*
+        version: link:../node-util
+      '@upradata/util':
+        specifier: workspace:*
+        version: link:../../util
+      fs-extra:
+        specifier: ^11.1.1
+        version: 11.1.1
+    devDependencies:
+      '@types/fs-extra':
+        specifier: ^11.0.1
+        version: 11.0.1
+      '@types/jest':
+        specifier: ^29.5.4
+        version: 29.5.4
+      '@types/node':
+        specifier: ^20.6.0
+        version: 20.6.0
+      concurrently:
+        specifier: ^8.2.1
+        version: 8.2.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.6.0)(ts-node@10.9.1)
+      jest-environment-node:
+        specifier: ^29.7.0
+        version: 29.7.0
+      ts-jest:
+        specifier: ^29.1.1
+        version: 29.1.1(@babel/core@7.22.17)(jest@29.7.0)(typescript@5.2.2)
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.1(@types/node@20.6.0)(typescript@5.2.2)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.2.2
+
+  ../../libraries/node/json:
     dependencies:
       '@upradata/template-string-style':
         specifier: workspace:*
         version: link:../template-string-style
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       fs-extra:
         specifier: ^11.1.1
         version: 11.1.1
@@ -192,7 +235,7 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  ../../libraries/module:
+  ../../libraries/node/module:
     dependencies:
       '@upradata/cache':
         specifier: workspace:*
@@ -208,7 +251,7 @@ importers:
         version: link:../ts
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       fs-extra:
         specifier: ^11.1.1
         version: 11.1.1
@@ -241,18 +284,12 @@ importers:
         specifier: ^10.9.1
         version: 10.9.1(@types/node@20.6.0)(typescript@5.2.2)
 
-  ../../libraries/node-util:
+  ../../libraries/node/node-util:
     dependencies:
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
-      fs-extra:
-        specifier: ^11.1.1
-        version: 11.1.1
+        version: link:../../util
     devDependencies:
-      '@types/fs-extra':
-        specifier: ^11.0.1
-        version: 11.0.1
       '@types/jest':
         specifier: ^29.5.4
         version: 29.5.4
@@ -278,7 +315,7 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  ../../libraries/program-args:
+  ../../libraries/node/program-args:
     dependencies:
       '@upradata/module':
         specifier: workspace:*
@@ -288,7 +325,7 @@ importers:
         version: link:../template-string-style
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       commander:
         specifier: ^11.0.0
         version: 11.0.0
@@ -318,7 +355,7 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  ../../libraries/stats:
+  ../../libraries/node/stats:
     dependencies:
       '@upradata/template-string-style':
         specifier: workspace:*
@@ -328,7 +365,7 @@ importers:
         version: link:../terminal
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       typescript:
         specifier: ^5.2.2
         version: 5.2.2
@@ -355,11 +392,11 @@ importers:
         specifier: ^10.9.1
         version: 10.9.1(@types/node@20.6.0)(typescript@5.2.2)
 
-  ../../libraries/template-string-style:
+  ../../libraries/node/template-string-style:
     dependencies:
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       colors:
         specifier: ^1.4.0
         version: 1.4.0
@@ -389,14 +426,14 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  ../../libraries/terminal:
+  ../../libraries/node/terminal:
     dependencies:
       '@upradata/template-string-style':
         specifier: workspace:*
         version: link:../template-string-style
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       table:
         specifier: ^6.8.0
         version: 6.8.1
@@ -426,14 +463,14 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  ../../libraries/ts:
+  ../../libraries/node/ts:
     dependencies:
       '@upradata/find-up':
         specifier: workspace:*
         version: link:../find-up
       '@upradata/util':
         specifier: workspace:*
-        version: link:../util
+        version: link:../../util
       fs-extra:
         specifier: ^11.1.1
         version: 11.1.1

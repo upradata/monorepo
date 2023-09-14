@@ -95,7 +95,7 @@
    * and set projectFolderMaxDepth to a large number.
    */
     "projectFolderMinDepth": 2,
-    "projectFolderMaxDepth": 2,
+    "projectFolderMaxDepth": 3,
     /**
    * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
    * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
@@ -396,7 +396,7 @@
         // 
         // {
         //   "packageName": "my-controls",
-        //   "projectFolder": "libraries/my-controls",
+        //   "projectFolder": "libraries/node/my-controls",
         //   "reviewCategory": "production",
         //   "tags": [ "frontend-team" ]
         // },
@@ -415,67 +415,73 @@
         },
         {
             "packageName": "@upradata/node-util",
-            "projectFolder": "libraries/node-util",
+            "projectFolder": "libraries/node/node-util",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/program-args",
-            "projectFolder": "libraries/program-args",
+            "projectFolder": "libraries/node/program-args",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/template-string-style",
-            "projectFolder": "libraries/template-string-style",
+            "projectFolder": "libraries/node/template-string-style",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/ts",
-            "projectFolder": "libraries/ts",
+            "projectFolder": "libraries/node/ts",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/find-up",
-            "projectFolder": "libraries/find-up",
+            "projectFolder": "libraries/node/find-up",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/module",
-            "projectFolder": "libraries/module",
+            "projectFolder": "libraries/node/module",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/terminal",
-            "projectFolder": "libraries/terminal",
+            "projectFolder": "libraries/node/terminal",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/stats",
-            "projectFolder": "libraries/stats",
+            "projectFolder": "libraries/node/stats",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/cache",
-            "projectFolder": "libraries/cache",
+            "projectFolder": "libraries/node/cache",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/csv",
-            "projectFolder": "libraries/csv",
+            "projectFolder": "libraries/node/csv",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
         {
             "packageName": "@upradata/json",
-            "projectFolder": "libraries/json",
+            "projectFolder": "libraries/node/json",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/fs",
+            "projectFolder": "libraries/node/fs",
             "reviewCategory": "libraries",
             "shouldPublish": true
         }
