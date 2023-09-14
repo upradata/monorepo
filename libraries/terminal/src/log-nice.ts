@@ -1,5 +1,5 @@
 import { isArray, isPlainObject, entries } from '@upradata/util';
-import { bold, styles as s } from './template-style';
+import { bold, styles as s } from '@upradata/template-string-style';
 
 
 const open = (v: any[] | object, style: BracketStyle) => style(isArray(v) ? '[' : '{');
@@ -7,7 +7,7 @@ const close = (v: any[] | object, style: BracketStyle) => style(isArray(v) ? ']'
 
 
 const defaultV = {
-    key: (k: PropertyKey) => bold`${k}`,
+    key: (k: PropertyKey) => bold`${String(k)}`,
     value: (v: any) => `${v}`,
     bracket: (v => v === '[' || v === ']' ? s.bold.yellow.$`${v}` : s.bold.green.$`${v}`) as BracketStyle,
     indentize: (o => o.symbol.repeat(o.size)) as Indentize
