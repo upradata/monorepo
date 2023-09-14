@@ -1,0 +1,30 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "./src/index.ts"
+    ],
+    "entryPointStrategy": "resolve",
+    "out": "documentation",
+    "includeVersion": true,
+    "tsconfig": "tsconfig.doc.json",
+    "readme": "README.md",
+    "emit": "docs",
+    "theme": "default",
+    "lightHighlightTheme": "light-plus",
+    "darkHighlightTheme": "dark-plus",
+    // "customCss": "./typedoc.css",
+    "markedOptions": { // https://marked.js.org/
+        "mangle": false,
+        // "highlight": "<Shiki based highlighter>",
+        // "renderer": "Renderer that adds links to headers"
+    },
+    "htmlLang": "en",
+    "commentStyle": "jsdoc",
+    "jsDocCompatibility": {
+        "exampleTag": true,
+        "defaultTag": true
+    },
+    "watch": false,
+    "logLevel": "Info",
+    "skipErrorChecking": false
+}
