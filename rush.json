@@ -418,6 +418,66 @@
             "projectFolder": "libraries/node-util",
             "reviewCategory": "libraries",
             "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/program-args",
+            "projectFolder": "libraries/program-args",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/template-string-style",
+            "projectFolder": "libraries/template-string-style",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/ts",
+            "projectFolder": "libraries/ts",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/find-up",
+            "projectFolder": "libraries/find-up",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/module",
+            "projectFolder": "libraries/module",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/terminal",
+            "projectFolder": "libraries/terminal",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/stats",
+            "projectFolder": "libraries/stats",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/cache",
+            "projectFolder": "libraries/cache",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/csv",
+            "projectFolder": "libraries/csv",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/json",
+            "projectFolder": "libraries/json",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
         }
     ]
 }

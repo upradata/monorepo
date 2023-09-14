@@ -1,0 +1,2 @@
+# @upradata/terminal
+terminal

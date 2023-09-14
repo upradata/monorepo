@@ -11,6 +11,38 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@upradata/cache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/find-up",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/json",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/module",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/node-util",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/template-string-style",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/terminal",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/ts",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@upradata/util",
       "allowedCategories": [ "libraries" ]
     },
