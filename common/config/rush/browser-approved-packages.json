@@ -1,0 +1,130 @@
+// DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
+  "packages": [
+    {
+      "name": "@mxssfd/typedoc-theme",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@schemastore/package",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/util",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "colors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "commander",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "common-tags",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "concurrently",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "csvtojson",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "emoji-regex",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "fs-extra",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "glob",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-environment-node",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "json5",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "local-web-server",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "locate-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "memory-fs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "shx",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "table",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ts-jest",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ts-node",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tsconfig",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tsconfig-paths",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "typedoc-plugin-clarity",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "typedoc-plugin-coverage",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "typedoc-plugin-extras",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "typedoc-plugin-keywords",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "typedoc-theme-hierarchy",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "types-tsconfig",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "typescript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "vinyl",
+      "allowedCategories": [ "libraries" ]
+    }
+  ]
+}
