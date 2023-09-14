@@ -1,0 +1,87 @@
+{
+    "root": true,
+    "emptyLinesAfterAllImports": 2,
+    "emptyLinesBetweenGroups": 1,
+    "removeLastSlashInPath": true,
+    "removeLastIndexInPath": false,
+    "excludeGlob": [],
+    "exclude": [],
+    "trailingComma": "none",
+    "tabSize": 4,
+    "maxLineLength": 160,
+    "wrappingStyle": {
+        "maxBindingNamesPerLine": 6,
+        "maxDefaultAndBindingNamesPerLine": 7,
+        "maxExportNamesPerLine": 10,
+        "maxNamesPerWrappedLine": 1,
+        "ignoreComments": false
+    },
+    "formatExports": false,
+    "autoFormat": "off",
+    "groupRules": [
+        {
+            "flags": "scripts",
+            "subGroups": [
+                "^@",
+                "^\\S+:",
+                "^[^.]",
+                {}
+            ]
+        },
+        {
+            "flags": "named",
+            "regex": "^.*\\.(css|scss|sass)$",
+            "subGroups": [
+                "^@[^.]",
+                "^[^.]",
+                "^[.]",
+                {}
+            ]
+        },
+        {
+            "flags": "named",
+            "regex": "^.*\\.(json|json8|jsonc)$",
+            "subGroups": [
+                "^@[^.]",
+                "^[^.]",
+                "^[.]",
+                {}
+            ]
+        },
+        {
+            "flags": "named",
+            "importType": false,
+            "subGroups": [
+                "^react(-dom)?$",
+                "^@angular/",
+                "^vue$",
+                "^@[^.]",
+                "^[^.]",
+                "^[.]",
+                {}
+            ]
+        },
+        {
+            "flags": "named",
+            "importType": true,
+            "subGroups": [
+                "^@[^.]",
+                "^[^.]",
+                "^[.]",
+                {}
+            ]
+        },
+        {}
+    ],
+    "sortImportsBy": "paths",
+    "sortRules": {
+        "names": [
+            "_",
+            "aA"
+        ],
+        "paths": [
+            "_",
+            "aA"
+        ]
+    }
+}
