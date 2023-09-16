@@ -157,7 +157,7 @@ export class Store {
             print.criteria = this.criteriaFunc(file).toString();
 
         if (isDefined(this.options.extra))
-            print.extra = this.options.extra(file);
+            print.extra = this.options.extra!(file);
 
 
         this.storeCollection.addFilePrint(file, print, ...collectionName);
@@ -166,7 +166,7 @@ export class Store {
     }
 
     public filePrint(file: string, collectionName: string | string[]) {
-        const fileprint = chain(() => this.getCollection(...ensureArray(collectionName)).collection[ file ]);
+        const fileprint = this.getCollection(...ensureArray(collectionName))?.collection[ file ];
 
         return isFilePrint(fileprint) ? fileprint : undefined;
     }
@@ -174,9 +174,16 @@ export class Store {
     public fileHasChanged(filepath: string, collectionName: string[] = [], options?: CacheChangeOptions) {
         const opts = Object.assign({}, this.options, options);
 
-        const collections = opts.recursive ?
-            chain(() => [ ...this.getCollection(...collectionName).collectionIterator() ].map(c => [ c.name ] /* collectionName.concat(c.name) */), [ collectionName ]) :
-            [ collectionName ];
+        const getCollections = () => {
+            if (opts.recursive) {
+                const collection = this.getCollection(...collectionName);
+                return collection ? [ ...collection.collectionIterator() ].map(c => [ c.name ] /* collectionName.concat(c.name) */) : [];
+            }
+
+            return [ collectionName ];
+        };
+
+        const collections = getCollections();
 
         for (const collName of collections) {
             const files = this.files(collName);
@@ -193,17 +200,22 @@ export class Store {
                 return true;
 
             const criteria: keyof FilePrint = this.options.criteria === 'mtime' ? 'mtime' : 'criteria';
-            return !this.options.isSameComparator(filepath, file.fileprint[ criteria ]);
+            const fileprint = file.fileprint[ criteria ];
+
+            if (!fileprint)
+                throw new Error(`No fileprint of criteria="${criteria}" has been found for file ${filepath} in collection ${collName}`);
+
+            return !this.options.isSameComparator(filepath, fileprint);
         }
 
         return opts.onlyExistingFiles ? false : true;
     }
 
     public deleteFile(file: string, ...collectionName: string[]) {
-        const collection = chain(() => this.storeCollection.getCollection(...collectionName).collection);
+        const collection = this.storeCollection.getCollection(...collectionName)?.collection;
 
         if (isDefined(collection))
-            delete collection[ file ];
+            delete collection![ file ];
         else
             warn(`[deleteFile] No such file in collection: ${file}`);
     }
@@ -218,8 +230,8 @@ export class Store {
         const storeCollection = this.storeCollection.getCollection(...collectionNameSplit.slice(0, -1));
         const name = collectionNameSplit[ collectionNameSplit.length - 1 ];
 
-        if (isDefined(storeCollection.collection[ name ]))
-            delete storeCollection.collection[ name ];
+        if (isDefined(storeCollection?.collection[ name ]))
+            delete storeCollection!.collection[ name ];
 
         return this;
     }
@@ -238,14 +250,14 @@ export class Store {
         const collection = this.storeCollection.getCollection(...collectionName);
 
         if (isDefined(collection))
-            yield* collection.filePrintIterator();
+            yield* collection!.filePrintIterator();
     }
 
     public * collectionIterator(...collectionName: string[]) {
         const collection = this.storeCollection.getCollection(...collectionName);
 
         if (isDefined(collection))
-            yield* collection.collectionIterator();
+            yield* collection!.collectionIterator();
 
     }
 }

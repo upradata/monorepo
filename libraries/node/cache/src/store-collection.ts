@@ -14,7 +14,9 @@ export function isFilePrint(v: any): v is FilePrint {
 }
 
 export type WalkActionBefore = (args: { node: StoreCollection | FilePrint, name: string, isLast: boolean; }) => any;
-export type WalkActionAfter<R> = (args: { parentCollection: StoreCollection; node: StoreCollection | FilePrint, name: string, isLast: boolean; }) => R;
+export type WalkActionAfter<R> = (
+    args: { parentCollection: StoreCollection; node: StoreCollection | FilePrint, name: string, isLast: boolean; }
+) => R | undefined;
 
 
 export type CollectionObject = ObjectOf<CollectionObject | FilePrint>;
@@ -83,8 +85,8 @@ export class StoreCollection {
     fileExists(file: string, ...collectionName: string[]) {
         try {
             if (collectionName.length > 0) {
-                const collection = this.getCollection(...collectionName).collection;
-                return isFilePrint(collection[ file ]);
+                const collection = this.getCollection(...collectionName)?.collection;
+                return collection ? isFilePrint(collection[ file ]) : false;
             }
 
             return [ ...this.filePrintIterator() ].find(f => f.filepath === file);
@@ -93,7 +95,7 @@ export class StoreCollection {
         }
     }
 
-    getCollection(...collectionNames: string[]): StoreCollection {
+    getCollection(...collectionNames: string[]): StoreCollection | undefined {
         if (collectionNames.length === 0)
             return this;
 
@@ -124,7 +126,7 @@ export class StoreCollection {
                     throw new Error(`"${name}" is not a collection in the cache store in ${this.path}`);
             },
             actionAfter: ({ node }) => node as StoreCollection
-        });
+        }) as StoreCollection;
     }
 
     addFilePrint(filename: string, filePrint: FilePrint, ...collectionNames: string[]) {
@@ -133,21 +135,21 @@ export class StoreCollection {
     }
 
 
-    walkTree<R>(args: { nodePath: string[]; actionBefore?: WalkActionBefore; actionAfter?: WalkActionAfter<R>; }) {
+    walkTree<R>(args: { nodePath: string[]; actionBefore?: WalkActionBefore; actionAfter?: WalkActionAfter<R>; }): R | undefined {
         const { actionBefore, actionAfter } = args;
-        let lastAction: R = undefined;
+        let lastAction: R | undefined = undefined;
 
-        const isPathMode = args.nodePath && args.nodePath.length > 0;
-        const getNodePath = (nodePath: string[]) => isPathMode ? [ ...nodePath ] : undefined;
+        const isPathMode = args.nodePath?.length > 0;
+        const getNodePath = (nodePath: string[] | undefined) => isPathMode ? [ ...nodePath! ] : undefined;
 
         // nodePath can be ['a.b','c','d.e.f'] that means [a,b,c,d,e,f]
         const mergedNodePath = isPathMode ? this.mergeCollectNames(...args.nodePath).split('.') : [];
 
-        const walk = (storeCollection: StoreCollection, nodePath: string[]) => {
-            const nodeNames = isPathMode ? (nodePath.length === 0 ? [] : [ nodePath.shift() ]) : Object.keys(storeCollection.collection);
+        const walk = (storeCollection: StoreCollection, nodePath: string[] | undefined) => {
+            const nodeNames = isPathMode ? (nodePath!.length === 0 ? [] : [ nodePath!.shift() ]) as string[] : Object.keys(storeCollection.collection);
 
             for (const name of nodeNames) {
-                const isLast = isPathMode && nodePath.length === 0;
+                const isLast = isPathMode && nodePath!.length === 0;
 
                 if (actionBefore)
                     actionBefore({ node: storeCollection, name, isLast });

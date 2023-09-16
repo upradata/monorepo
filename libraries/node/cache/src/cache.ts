@@ -37,7 +37,7 @@ export class Cache {
         return this;
     }
 
-    private processGlobs(files: File | File[], options?: { method?: string; verbose?: boolean; }) {
+    private processGlobs(files: File | File[], options: { method?: string; verbose?: boolean; } = {}) {
         const { method, verbose } = options;
 
         const globFiles = new GlobFiles(ensureArray(files));
@@ -95,22 +95,27 @@ export class Cache {
         return this.store.deleteAll();
     }
 
-    public cacheChanged(...collectionName: string[]) {
+    public cacheChanged(...collectionName: string[]): string[] {
         const collection = this.store.getCollection(...collectionName);
-        const changedCollections: string[] = [];
 
-        for (const { name } of collection.collectionIterator()) {
-            if (this.isChangedFiles(name))
-                changedCollections.push(name);
+        if (collection) {
+            const changedCollections: string[] = [];
+
+            for (const { name } of collection.collectionIterator()) {
+                if (this.isChangedFiles(name))
+                    changedCollections.push(name);
+            }
+
+            return changedCollections;
         }
 
-        return changedCollections;
+        return [];
     }
 
     public changedFiles(collectionName?: string | string[], files: File[] = [], options?: CacheChangeOptions): string[] {
-        const opts = new CacheChangeOptions({ ...options, verbose: isDefined(options?.verbose) ? options.verbose : this.options.verbose });
+        const opts = new CacheChangeOptions({ ...options, verbose: isDefined(options?.verbose) ? options?.verbose : this.options.verbose });
 
-        const collName = ensureArray(collectionName);
+        const collName = collectionName ? ensureArray(collectionName) : [];
 
         const fileNames = this.processGlobs(files, { method: 'changedFiles', verbose: opts.verbose });
         const collection = this.store.getCollection(...collName);
@@ -129,7 +134,10 @@ export class Cache {
     public isChangedFiles(collectionName?: string | string[], files?: File[], options?: CacheChangeOptions): boolean {
         /* if (this.store.files(...ensureArray(collectionName)).length === 0)
             return true; */
-        if (isUndefined(this.store.getCollection(...ensureArray(collectionName))))
+
+        const collName = collectionName ? ensureArray(collectionName) : [];
+
+        if (isUndefined(this.store.getCollection(...collName)))
             return true;
 
         return this.changedFiles(collectionName, files, options).length !== 0;

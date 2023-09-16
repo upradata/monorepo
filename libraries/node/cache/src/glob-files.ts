@@ -61,12 +61,14 @@ export class GlobFiles {
         for (const { pattern, options } of this.globFiles) {
             try {
 
-                if (!options.noGlob) {
-                    const filesList = glob.sync(pattern, options).map(file => {
-                        if (file.startsWith('/'))
-                            return file;
+                if (!options?.noGlob) {
+                    const filesList = glob.sync(pattern, options || {}).map(file => {
+                        const fileString = file.toString();
 
-                        return path.join(options.cwd.toString() || '.', file);
+                        if (fileString.startsWith('/'))
+                            return fileString;
+
+                        return path.join(options?.cwd?.toString() || '.', fileString);
                     });
 
                     if (filesList.length === 0)
