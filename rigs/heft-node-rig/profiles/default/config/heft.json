@@ -1,0 +1,30 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+    "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+    "phasesByName": {
+        "build": {
+            "cleanFiles": [
+                {
+                    "includeGlobs": [
+                        "dist",
+                        "lib",
+                        "lib-commonjs",
+                        "lib-es5",
+                        "lib-es6",
+                        "lib-esm"
+                    ]
+                }
+            ],
+            "tasksByName": {
+                "typescript": {
+                    "taskPlugin": {
+                        "pluginPackage": "@upradata/heft-typescript-plugin"
+                    }
+                }
+            }
+        }
+    }
+}

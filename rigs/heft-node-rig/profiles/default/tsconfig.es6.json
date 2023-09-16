@@ -1,0 +1,13 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "lib-es6",
+        "module": "CommonJS",
+        "target": "ES6"
+    },
+    "exclude": [
+        "../../../../../node_modules",
+        "../../../../../src/**/*.example.ts",
+        "../../../../../src/**/*.spec.ts"
+    ]
+}

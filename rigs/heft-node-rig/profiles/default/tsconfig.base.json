@@ -1,0 +1,49 @@
+{
+    // will be installed to node_modules/@rushstack/heft-node-rig/lib of the consuming project
+    "$schema": "http://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+        "outDir": "../../../../../lib",
+        "rootDir": "../../../../../src",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        // "allowJs": true,
+        "declaration": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "lib": [
+            "ESNext"
+        ],
+        "skipLibCheck": true,
+        "moduleResolution": "Node",
+        "sourceMap": true,
+        "traceResolution": false,
+        "baseUrl": ".",
+        "forceConsistentCasingInFileNames": true,
+        "jsx": "react",
+        "declarationMap": true,
+        "inlineSources": true,
+        // "strict": true,
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": false,
+        "useUnknownInCatchVariables": false,
+        "noEmitOnError": false,
+        "allowUnreachableCode": false,
+        "types": [
+            "heft-jest"
+        ],
+        "typeRoots": [
+            "../../../../../node_modules/@types",
+            "../../node_modules/@types"
+        ],
+        "module": "commonjs",
+        "incremental": true
+    },
+    "include": [
+        "../../../../../src"
+    ],
+    "exclude": [
+        "../../../../../node_modules"
+    ]
+}
