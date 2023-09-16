@@ -132,7 +132,8 @@
             // Some example categories:
             "production", // projects that ship to production
             "tools", // non-shipping projects that are part of the developer toolchain
-            "libraries", // non-shipping projects that are part of the developer toolchain
+            "rush", // non-shipping projects that are used to configure and extends rush
+            "libraries", // libraries that are shared between multiple other projects
             "tests", // non-shipping test projects
             "prototypes" // experiments that should mostly be ignored by the review process
         ],
@@ -484,6 +485,21 @@
             "projectFolder": "libraries/node/fs",
             "reviewCategory": "libraries",
             "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/heft-node-rig",
+            "projectFolder": "rigs/heft-node-rig",
+            "reviewCategory": "libraries",
+            "shouldPublish": false
+        },
+        {
+            "packageName": "@upradata/heft-typescript-plugin",
+            "projectFolder": "heft-plugins/heft-typescript-plugin",
+            "reviewCategory": "rush",
+            "shouldPublish": true
+            /* "cyclicDependencyProjects": [
+                "@rushstack/heft-node-rig"
+            ] */
         }
     ]
 }

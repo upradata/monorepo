@@ -3,9 +3,8 @@
  * More documentation is available on the Rush website: https://rushjs.io
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
-
-  /**
+    "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+    /**
    * Custom "commands" introduce new verbs for the command-line.  To see the help for these
    * example commands, try "rush --help", "rush my-bulk-command --help", or
    * "rush my-global-command --help".
@@ -64,6 +63,37 @@
                 ]
             }
         }, */
+        {
+            "commandKind": "bulk",
+            "name": "build:watch",
+            "summary": "Build projects and watch for changes",
+            // use incremental build logic (important)
+            "incremental": true,
+            "enableParallelism": true,
+            // Enable "watch mode"
+            "watchForChanges": true
+        },
+        {
+            "commandKind": "bulk",
+            "name": "test:watch",
+            "summary": "Builds all projects and runs their tests.",
+            // use incremental build logic (important)
+            "incremental": true,
+            "enableParallelism": true,
+            // Enable "watch mode"
+            "watchForChanges": true
+        },
+        {
+            "commandKind": "bulk",
+            "name": "start:watch",
+            "summary": "Build all projects, then watch for changes, build and test.",
+            "description": "Build all projects, then watches for changes and builds and runs tests for affected projects.",
+            "safeForSimultaneousRushProcesses": false,
+            "enableParallelism": true,
+            "incremental": true,
+            // Initial execution only uses the build phase so that all dependencies of watch phases have been built
+            "watchForChanges": true
+        },
         {
             "name": "prettier",
             "commandKind": "global",

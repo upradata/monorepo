@@ -7,6 +7,26 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/eslint-config",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@rushstack/heft",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@rushstack/heft-config-file",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@rushstack/heft-node-rig",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "@rushstack/node-core-library",
+      "allowedCategories": [ "rush" ]
+    },
+    {
       "name": "@schemastore/package",
       "allowedCategories": [ "libraries" ]
     },
@@ -20,6 +40,14 @@
     },
     {
       "name": "@upradata/fs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/heft-node-rig",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/heft-typescript-plugin",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -75,6 +103,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "eslint",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "fs-extra",
       "allowedCategories": [ "libraries" ]
     },
@@ -107,12 +139,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "semver",
+      "allowedCategories": [ "rush" ]
+    },
+    {
       "name": "shx",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "table",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tapable",
+      "allowedCategories": [ "rush" ]
     },
     {
       "name": "ts-jest",
@@ -156,7 +196,7 @@
     },
     {
       "name": "typescript",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "rush" ]
     },
     {
       "name": "vinyl",

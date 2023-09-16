@@ -77,9 +77,7 @@ common/autoinstallers/*/.npmrc
 # mine
 temp
 lib
-lib-amd
-lib-es6
-lib-esm
+lib-*
 dist
 _bundles
 bundles
