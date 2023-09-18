@@ -12,7 +12,7 @@
     },
     {
       "name": "@rushstack/heft",
-      "allowedCategories": [ "rush" ]
+      "allowedCategories": [ "libraries", "rush" ]
     },
     {
       "name": "@rushstack/heft-config-file",
@@ -139,6 +139,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "path-scurry",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "semver",
       "allowedCategories": [ "rush" ]
     },
@@ -168,6 +172,10 @@
     },
     {
       "name": "tsconfig-paths",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tslib",
       "allowedCategories": [ "libraries" ]
     },
     {
