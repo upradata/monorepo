@@ -1,7 +1,8 @@
 import { assignRecursive, ensureArray, isPlainObject } from '@upradata/util';
-import glob, { GlobOptions } from 'glob';
+import { globSync, GlobOptions } from 'glob';
 import path from 'node:path';
 
+import type * as GlobTypes from '../node_modules/glob/dist/cjs/src/glob';
 
 export type GlobFilesOptions = GlobOptions & { noGlob?: boolean; };
 export type GlobFile = { pattern: string; options?: GlobFilesOptions; };
@@ -60,9 +61,9 @@ export class GlobFiles {
 
         for (const { pattern, options } of this.globFiles) {
             try {
-
                 if (!options?.noGlob) {
-                    const filesList = glob.sync(pattern, options || {}).map(file => {
+
+                    const filesList = globSync(pattern, options || {}).map((file: GlobTypes.Result<any>) => {
                         const fileString = file.toString();
 
                         if (fileString.startsWith('/'))
@@ -82,7 +83,6 @@ export class GlobFiles {
 
             } catch (err) {
                 noFiles.push({ pattern, err });
-
             }
         }
 
