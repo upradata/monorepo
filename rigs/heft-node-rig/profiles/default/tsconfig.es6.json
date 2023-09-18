@@ -6,8 +6,6 @@
         "target": "ES6"
     },
     "exclude": [
-        "../../../../../node_modules",
-        "../../../../../src/**/*.example.ts",
-        "../../../../../src/**/*.spec.ts"
+        "../../../../../node_modules"
     ]
 }

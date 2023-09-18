@@ -24,7 +24,7 @@
             "moduleKind": "CommonJS",
             "target": "ES2015",
             "outFolderName": "lib-es6",
-            "jsExtension": "cjs"
+            // "jsExtension": "cjs"
         },
         {
             "moduleKind": "CommonJS",

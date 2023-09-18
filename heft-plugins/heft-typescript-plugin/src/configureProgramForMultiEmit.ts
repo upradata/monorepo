@@ -121,6 +121,7 @@ export function configureProgramForMultiEmit(
     }
 
     const changedFiles: Set<TTypescript.SourceFile> = new Set();
+    const outdirDone: Set<string> = new Set();
 
     program.emit = (
         targetSourceFile?: TTypescript.SourceFile,
@@ -148,6 +149,7 @@ export function configureProgramForMultiEmit(
         let defaultModuleKindResult: TTypescript.EmitResult;
         const diagnostics: TTypescript.Diagnostic[] = [];
         let emitSkipped: boolean = false;
+
         try {
             for (const [ moduleKindToEmit, kindCompilerOptions ] of multiEmitMap) {
                 program.getCompilerOptions = () => kindCompilerOptions;
@@ -155,14 +157,20 @@ export function configureProgramForMultiEmit(
                 // options in the closure and passes it to `ts.getTransformers()`
                 originalCompilerOptions.module = moduleKindToEmit.moduleKind;
 
-                if (logger) {
+                const moduleTarget = JSON.stringify({ moduleKind: moduleKindToEmit.moduleKind, target: moduleKindToEmit.target });
+
+                if (logger && !outdirDone.has(moduleTarget)) {
+
                     const module = Object.entries(ts.ModuleKind).find(([ , value ]) => value === moduleKindToEmit.moduleKind)?.[ 0 ];
                     const target = Object.entries(ts.ScriptTarget).find(([ , value ]) => value === moduleKindToEmit.target)?.[ 0 ];
 
                     logger.terminal.writeLine(
-                        `compiling < module: "${module}", target: "${target}" >` +
+                        `compiling (module: "${module}", target: "${target}")` +
                         ` --> "${path.relative(buildFolderPath, moduleKindToEmit.outFolderPath)}`
                     );
+
+                    // console.log(kindCompilerOptions);
+                    outdirDone.add(moduleTarget);
                 }
 
 

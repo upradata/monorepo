@@ -1,3 +1,38 @@
 {
-    "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json"
+    "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json",
+    // "Adding '<rootDir>/lib' here enables lib/__mocks__ to be used for mocking Node.js system modules
+    "roots": [
+        "<rootDir>/lib-es6"
+    ],
+    "testMatch": [
+        // Jest does not support well mjs (esm modules)
+        // https://jestjs.io/docs/ecmascript-modules
+        // "<rootDir>/lib-es6/**/__tests__/**/*.{cjs,js}?(x)",
+        // "<rootDir>/lib-es6/**/!(e2e)/**/*.(spec|test).{cjs,js}?(x)"
+        "<rootDir>/lib-es6/**/*.(spec|test).{cjs,js}"
+    ],
+    "testPathIgnorePatterns": [
+        "/node_modules/"
+    ],
+    // Code coverage tracking is disabled by default; set this to true to enable it
+    "collectCoverage": false,
+    "collectCoverageFrom": [
+        "lib-es6/**/*.{cjs,js}",
+        "!lib-es6/**/*.d.ts",
+        "!lib-es6/**/*.test.{cjs,js}",
+        "!lib-es6/**/test/**",
+        "!lib-es6/**/__tests__/**",
+        "!lib-es6/**/__fixtures__/**",
+        "!lib-es6/**/__mocks__/**"
+    ],
+    "coveragePathIgnorePatterns": [
+        "/node_modules/"
+    ],
+    // Prefer .cjs to .js to catch explicit commonjs output. Optimize for local files, which will be .js
+    "moduleFileExtensions": [
+        "cjs",
+        "js",
+        "json",
+        "node"
+    ]
 }
