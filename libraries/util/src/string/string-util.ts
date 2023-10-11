@@ -9,53 +9,50 @@ const STRING_UNDERSCORE_REGEXP_2 = (/-|\s+/g);
 /**
  * Converts a camelized string into all lower case separated by underscores.
  *
- ```javascript
- decamelize('innerHTML');         // 'inner_html'
- decamelize('action_name');       // 'action_name'
- decamelize('css-class-name');    // 'css-class-name'
- decamelize('my favorite items'); // 'my favorite items'
- ```
+```javascript
+decamelize('innerHTML');         // 'inner_html'
+decamelize('action_name');       // 'action_name'
+decamelize('css-class-name');    // 'css-class-name'
+decamelize('my favorite items'); // 'my favorite items'
+```
 
- @method decamelize
- @param {String} str The string to decamelize.
- @return {String} the decamelized string.
+ * @param str - The string to decamelize.
+ * @returns the decamelized string.
  */
 export function decamelize(str: string): string {
     return str.replace(STRING_DECAMELIZE_REGEXP, '$1_$2').toLowerCase();
 }
 
 /**
- Replaces underscores, spaces, or camelCase with dashes.
+ * Replaces underscores, spaces, or camelCase with dashes.
 
- ```javascript
- dasherize('innerHTML');         // 'inner-html'
- dasherize('action_name');       // 'action-name'
- dasherize('css-class-name');    // 'css-class-name'
- dasherize('my favorite items'); // 'my-favorite-items'
- ```
+```javascript
+dasherize('innerHTML');         // 'inner-html'
+dasherize('action_name');       // 'action-name'
+dasherize('css-class-name');    // 'css-class-name'
+dasherize('my favorite items'); // 'my-favorite-items'
+```
 
- @method dasherize
- @param {String} str The string to dasherize.
- @return {String} the dasherized string.
+ * @param str - The string to dasherize.
+ * @returns the dasherized string.
  */
 export function dasherize(str: string): string {
     return decamelize(str).replace(STRING_DASHERIZE_REGEXP, '-');
 }
 
 /**
- Returns the lowerCamelCase form of a string.
+ * Returns the lowerCamelCase form of a string.
 
- ```javascript
- camelize('innerHTML');          // 'innerHTML'
- camelize('action_name');        // 'actionName'
- camelize('css-class-name');     // 'cssClassName'
- camelize('my favorite items');  // 'myFavoriteItems'
- camelize('My Favorite Items');  // 'myFavoriteItems'
- ```
+```javascript
+camelize('innerHTML');          // 'innerHTML'
+camelize('action_name');        // 'actionName'
+camelize('css-class-name');     // 'cssClassName'
+camelize('my favorite items');  // 'myFavoriteItems'
+camelize('My Favorite Items');  // 'myFavoriteItems'
+```
 
- @method camelize
- @param {String} str The string to camelize.
- @return {String} the camelized string.
+ * @param str - The string to camelize.
+ * @returns the camelized string.
  */
 export function camelize(str: string): string {
     return str
@@ -68,35 +65,32 @@ export function camelize(str: string): string {
 /**
  Returns the UpperCamelCase form of a string.
 
- ```javascript
- 'innerHTML'.classify();          // 'InnerHTML'
- 'action_name'.classify();        // 'ActionName'
- 'css-class-name'.classify();     // 'CssClassName'
- 'my favorite items'.classify();  // 'MyFavoriteItems'
- ```
+```javascript
+'innerHTML'.classify();          // 'InnerHTML'
+'action_name'.classify();        // 'ActionName'
+'css-class-name'.classify();     // 'CssClassName'
+'my favorite items'.classify();  // 'MyFavoriteItems'
+```
 
- @method classify
- @param {String} str the string to classify
- @return {String} the classified string
+ * @param str - the string to classify
+ * @returns the classified string
  */
 export function classify(str: string): string {
     return str.split('.').map(part => capitalize(camelize(part))).join('.');
 }
 
 /**
- More general than decamelize. Returns the lower\_case\_and\_underscored
- form of a string.
+ Returns the lower_case_and_underscored form of a string.
 
- ```javascript
- 'innerHTML'.underscore();          // 'inner_html'
- 'action_name'.underscore();        // 'action_name'
- 'css-class-name'.underscore();     // 'css_class_name'
- 'my favorite items'.underscore();  // 'my_favorite_items'
- ```
+```javascript
+'innerHTML'.underscore();          // 'inner_html'
+'action_name'.underscore();        // 'action_name'
+'css-class-name'.underscore();     // 'css_class_name'
+'my favorite items'.underscore();  // 'my_favorite_items'
+```
 
- @method underscore
- @param {String} str The string to underscore.
- @return {String} the underscored string.
+ * @param str - The string to underscore.
+ * @returns the underscored string.
  */
 export function underscore(str: string): string {
     return str
@@ -108,16 +102,15 @@ export function underscore(str: string): string {
 /**
  Returns the Capitalized form of a string
 
- ```javascript
- 'innerHTML'.capitalize()         // 'InnerHTML'
- 'action_name'.capitalize()       // 'Action_name'
- 'css-class-name'.capitalize()    // 'Css-class-name'
- 'my favorite items'.capitalize() // 'My favorite items'
- ```
+```javascript
+'innerHTML'.capitalize()         // 'InnerHTML'
+'action_name'.capitalize()       // 'Action_name'
+'css-class-name'.capitalize()    // 'Css-class-name'
+'my favorite items'.capitalize() // 'My favorite items'
+```
 
- @method capitalize
- @param {String} str The string to capitalize.
- @return {String} The capitalized string.
+ @param str - The string to capitalize.
+ @returns The capitalized string.
  */
 export function capitalize(str: string): string {
     return str.charAt(0).toUpperCase() + str.substr(1);
@@ -129,20 +122,20 @@ export function capitalize(str: string): string {
  * Based off https://gist.github.com/andrei-m/982927 (for using the faster dynamic programming
  * version).
  *
- * @param a String a.
- * @param b String b.
- * @returns A number that represents the distance between the two strings. The greater the number
- *   the more distant the strings are from each others.
+ * @param a - String a.
+ * @param b - String b.
+ * @returns A number that represents the distance between the two strings.
+ * The greater the number the more distant the strings are from each others.
  */
 export function levenshtein(a: string, b: string): number {
-    if (a.length == 0) {
+    if (a.length === 0) {
         return b.length;
     }
-    if (b.length == 0) {
+    if (b.length === 0) {
         return a.length;
     }
 
-    const matrix = [];
+    const matrix: Array<number[]> = [];
 
     // increment along the first column of each row
     for (let i = 0; i <= b.length; i++) {
@@ -157,7 +150,7 @@ export function levenshtein(a: string, b: string): number {
     // Fill in the rest of the matrix
     for (let i = 1; i <= b.length; i++) {
         for (let j = 1; j <= a.length; j++) {
-            if (b.charAt(i - 1) == a.charAt(j - 1)) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
                 matrix[ i ][ j ] = matrix[ i - 1 ][ j - 1 ];
             } else {
                 matrix[ i ][ j ] = Math.min(

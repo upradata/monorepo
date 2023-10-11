@@ -1,15 +1,17 @@
-import { KeysRecursive, PrimitiveRecursive } from './recursive.type';
-import { Arr } from '../types';
+import { isPlainObject } from '../is';
+
+import type { Arr } from '../types';
+import type { KeysRecursive, PrimitiveRecursive } from './recursive.type';
 
 
-export const forEach = <T extends Arr<any> | {}>(o: T, callback: (key: KeysRecursive<T>, v: PrimitiveRecursive<T>) => void | 'stop', isRecursive: boolean = false): void => {
+export const forEach = <T extends Arr<any> | object>(o: T, callback: (key: KeysRecursive<T>, v: PrimitiveRecursive<T>) => void | 'stop', isRecursive: boolean = false): void => {
     let stop = false;
 
     Object.entries(o).forEach(([ k, v ]) => {
         if (stop)
             return;
 
-        if (typeof v === 'object')
+        if (isPlainObject(v))
             forEach(v, callback as any /* to avoid Type instantiation is excessively deep */, isRecursive);
         else {
             const ret = callback(k as any, v as any);

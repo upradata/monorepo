@@ -1,6 +1,8 @@
 /* import type { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators'; */
+import { isDefined } from './is';
 import { PlainObj } from './types';
+
 
 export interface State {
     obj: PlainObj;
@@ -13,7 +15,8 @@ export class ExecuteOnTempState {
     private tmpState: PlainObj;
 
     constructor(state?: State) {
-        this.state(state);
+        if (isDefined(state))
+            this.state(state);
     }
 
     private backAndReturn<Return>(ret: Return) {

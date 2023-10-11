@@ -6,7 +6,8 @@ type PartialRec<T> = {
     [ K in keyof T ]?: isArray<T[ K ]> extends true ? T[ K ] : PartialRecursive<T[ K ]>;
 }; */
 
-import { Levels } from './useful';
+import type { IsRecrusivable, PartialRecursiveOptions } from './is-recursivable';
+import type { Levels } from './useful';
 
 // https://stackoverflow.com/questions/41980195/recursive-partialt-in-typescript-2-1
 // more compact than mine
@@ -24,19 +25,13 @@ export type PartialRecursiveWithArray<T> = {
     T[ K ];
 };*/
 
-type IsRecrusivable<T, Options extends PartialRecursiveOptions> = never |
-    T extends (RegExp | Date | Promise<any>) ? false :
-    T extends (...args: unknown[]) => unknown ? false :
-    T extends unknown[] ? Options extends 'no-array' ? false : true :
-    T extends object ? true :
-    false;
 
-
-export type PartialRecursiveOptions = 'no-array' | 'none';
-
-export type PartialRecursive<T, Options extends PartialRecursiveOptions = 'none', Depth extends number = 20> = Depth extends 0 ? Partial<T> : {
-    [ K in keyof T ]?: IsRecrusivable<T[ K ], Options> extends true ? PartialRecursive<T[ K ], Options, Levels[ Depth ]> : T[ K ]
-};
+export type PartialRecursive<T, Options extends PartialRecursiveOptions = 'none', Level extends number = 5> =
+    Level extends 0 ? Partial<T> : {
+        [ K in keyof T ]?: IsRecrusivable<T[ K ], Options> extends true ?
+        PartialRecursive<T[ K ], Options, Levels[ Level ]> :
+        T[ K ]
+    };
 
 
 

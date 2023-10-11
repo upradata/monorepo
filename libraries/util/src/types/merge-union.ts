@@ -23,7 +23,6 @@
 
 
 
-
 // keyof A | B will return keys that are in common
 // type A = keyof ({ a: string; } | { a: number; b: string; });
 // ==> type A = "a"
@@ -63,7 +62,7 @@ type NonCommons<T> = {
 //     b?: 2;
 // }
 
-type Values<T extends {}> = {
+type Values<T extends object> = {
     [ K in keyof T ]: T[ K ];
 };
 

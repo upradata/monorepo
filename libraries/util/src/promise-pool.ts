@@ -25,7 +25,7 @@ export class PromisePool<T = unknown> {
 
     private next() {
         if (this.pool.size < this.size && this.queue.length > 0) {
-            const asyncFunc = this.queue.pop();
+            const asyncFunc = this.queue.pop() as AsyncFunc<T>;
 
             ++this.i;
             const { i } = this;
@@ -47,10 +47,10 @@ export class PromisePool<T = unknown> {
     public done(): Promise<T[]> {
         this.isDoneCalled = true;
 
-        return new Promise<T[]>((res, _rej) => {
+        return new Promise<T[]>((resolve, _reject) => {
             this.resolve = () => {
                 // result in order
-                res([ ...this.result.values() ]);
+                resolve([ ...this.result.values() ]);
             };
 
             if (this.queue.length === 0 && this.i === this.result.size - 1)

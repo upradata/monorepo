@@ -3,5 +3,4 @@ export class BooleanAttribute {
         const v = value === undefined ? false : value;
         return typeof v === 'boolean' ? v : true;
     }
-
-} 
+}

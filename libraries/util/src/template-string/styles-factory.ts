@@ -1,9 +1,11 @@
-import { Prop, ToString } from './../types';
-import { StyleTransform, Style, StyleOptions } from './style';
-import { CommonTagStyle } from './helpers/common-tags.type';
 import * as commonTags from 'common-tags';
-import { recreateString } from './recreate-string';
 import { keys, makeObject } from '../object';
+import { CommonTagStyle } from './helpers/common-tags.type';
+import { recreateString } from './recreate-string';
+import { Style, StyleOptions, StyleTransform } from './style';
+
+import type { Prop, ToString } from '../types';
+import { isDefined } from '../is';
 
 
 export const buildStyle = (names: Array<string | number>, options: Record<Prop, StyleOptions>) => {
@@ -11,11 +13,13 @@ export const buildStyle = (names: Array<string | number>, options: Record<Prop, 
     for (const k of names) {
 
         Object.defineProperty(Style.prototype, k, {
-            // tslint:disable-next-line:object-literal-shorthand
+            // eslint-disable-next-line object-shorthand
             get: function (this: Style) {
-                // this will allow syntax red.bgYellow.underline.$ 
+                // this will allow syntax red.bgYellow.underline.$
                 const o = { ...options[ k ] };
-                o.transforms = [ this, ...o.transforms ];
+
+                if (isDefined(o.transforms))
+                    o.transforms = [ this, ...o.transforms ];
 
                 return new Style(o);
             }

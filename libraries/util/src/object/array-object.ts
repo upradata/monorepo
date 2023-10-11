@@ -23,26 +23,28 @@ export const toObject = <O extends RecordOf<any>, K extends keyof O, M extends '
 
 // toArray({ a: { k1: 1, k2: 2 }, b: { k1: 3, k2: 4 } }, 'key') => [ { key: 'a', k1: 1, k2: 2 }, { key: 'b', k1: 3, k2: 4 } ]
 // toArray({ a: { k1: 1, k2: 2 }, b: { k1: 3, k2: 4 } }, undefined) => [ { k1: 1, k2: 2 }, { k1: 3, k2: 4 } ]
-type ToArrayValue<T> = InferRecordType<T> extends {} ? InferRecordType<T> : { value: T; };
-type ToArrayReturn<T, OnlyValues extends boolean, Extra = {}> = OnlyValues extends true ? ToArrayValue<T> : ToArrayValue<T> & Extra;
-type KeyOf<T> = InferRecordType<T> extends {} ? keyof T : T;
+type ToArrayValue<T> = InferRecordType<T> extends object ? InferRecordType<T> : { value: T; };
+type ToArrayReturn<T, OnlyValues extends boolean | undefined, Extra = {}> = OnlyValues extends true ? ToArrayValue<T> : ToArrayValue<T> & Extra;
+type KeyOf<T> = InferRecordType<T> extends object ? keyof T : T;
 
-export class ToArrayOptions<T extends {}> {
+export class ToArrayOptions<T extends object> {
     onlyValues?: boolean = false;
-    filter?: (key: keyof T, value?: T[ keyof T ]) => boolean = (_k, _v) => true;
     keyName?: Key = 'key';
+    filter?: (key: keyof T, value?: T[ keyof T ]) => boolean = (_k, _v) => true;
 }
 
 
-// export function toArray<T extends {}, O extends ToArrayOptions>(o: T, options?: O): ToArrayReturn<O, O[ 'onlyValues' ] extends true ? {} : { key: KeyOf<O>; }>[] {
-// export function toArray<O extends {}, K extends Key = 'key'>(o: O, keyName?: K): ToArrayReturn<O, { [ k in K ]: KeyOf<O> }>[];
+// export function toArray<T extends object, O extends ToArrayOptions>(o: T, options?: O): ToArrayReturn<O, O[ 'onlyValues' ] extends true ? {} : { key: KeyOf<O>; }>[] {
+// export function toArray<O extends object, K extends Key = 'key'>(o: O, keyName?: K): ToArrayReturn<O, { [ k in K ]: KeyOf<O> }>[];
 // export function toArray<O>(o: O, keyName?: Key): O[] {
 
-type ToArrayKey<O extends ToArrayOptions<any>> = O extends never ? 'key' : O[ 'keyName' ];
+type ToArrayKey<O extends ToArrayOptions<any>> = O extends never ? 'key' : Exclude<O[ 'keyName' ], undefined>;
 
-export function toArray<T extends {}, O extends ToArrayOptions<T>>(o: T, options?: Partial<O>): ToArrayReturn<T, O[ 'onlyValues' ], { [ P in ToArrayKey<O> ]: KeyOf<T> }>[] {
+export function toArray<T extends object, O extends ToArrayOptions<T>>(
+    o: T, options?: Partial<O>
+): ToArrayReturn<T, O[ 'onlyValues' ], { [ P in ToArrayKey<O> ]: KeyOf<T> }>[] {
 
-    const { onlyValues, filter, keyName } = Object.assign(new ToArrayOptions(), options) as ToArrayOptions<any>;
+    const { onlyValues, filter, keyName } = Object.assign(new ToArrayOptions(), options) as Required<ToArrayOptions<any>>;
 
     return Object.entries(o).filter(([ k, v ]) => filter(k, v)).map(([ k, v ]) => {
         if (onlyValues)

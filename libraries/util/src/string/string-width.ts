@@ -1,5 +1,6 @@
 import emojiRegex from 'emoji-regex';
-import isFullwidthCodePoint from './is-fullwidth-code-point';
+import { isFullwidthCodePoint } from './is-fullwidth-code-point';
+import { isUndefined } from '../is';
 
 // ANSI escapes are the terminal codes to add color/bell, ...
 // https://en.wikipedia.org/wiki/ANSI_escape_code
@@ -30,6 +31,9 @@ const getWidth = (s: string) => function computeWidth(width = 0, index = 0): num
         return width;
 
     const codePoint = s.codePointAt(index);
+
+    if (isUndefined(codePoint))
+        throw new Error(`Invalid index: string: "${s}" accessed with index "${index}"`);
 
     // Ignore control characters
     if (codePoint <= 0x1F || (codePoint >= 0x7F && codePoint <= 0x9F)) {

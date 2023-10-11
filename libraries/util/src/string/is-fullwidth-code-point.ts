@@ -8,7 +8,7 @@
 
 /* eslint-disable yoda */
 
-const isFullwidthCodePoint = (codePoint: number) => {
+export const isFullwidthCodePoint = (codePoint: number) => {
     if (!Number.isInteger(codePoint)) {
         return false;
     }
@@ -46,6 +46,3 @@ const isFullwidthCodePoint = (codePoint: number) => {
         (0x20000 <= codePoint && codePoint <= 0x3FFFD)
     );
 };
-
-
-export default isFullwidthCodePoint;

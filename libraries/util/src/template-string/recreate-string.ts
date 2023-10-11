@@ -1,6 +1,6 @@
 import { ToString } from '../types';
 
-export function recreateString(strings: TemplateStringsArray, ...keys: ToString[]) {
+export const recreateString = (strings: TemplateStringsArray, ...keys: ToString[]) => {
     const parameters = [ ...keys, '' ];
 
     let res = '';
@@ -10,4 +10,4 @@ export function recreateString(strings: TemplateStringsArray, ...keys: ToString[
     }
 
     return res;
-}
+};

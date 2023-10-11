@@ -11,7 +11,7 @@ export * from './mixin';
 export * from './object';
 export * from './promise-pool';
 export * from './promise';
-export * from './random';
+// export * from './random';
 export * from './regex';
 export * from './string';
 export * from './template-string';

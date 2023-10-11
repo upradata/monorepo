@@ -21,24 +21,24 @@ type NonCommonKeys<T> = Exclude<Keys<T>, CommonKeys<T>>;
 // So ToArray<T> = [T] extends [any] ? T[] : never; =>  ToArray<string | number> == (string | number)[] this time string | number is seen as one Type (one element)
 
 // But be careful, in each branch where T appears, the [T] extends trick has to be repeated.
-// Here, T appears in the [ K in CommmonKeys<T> ] first, so we have to put the trick before leading to this ugly syntax CommonKeys<T> extends infer K1 ... to avoid 
+// Here, T appears in the [ K in CommmonKeys<T> ] first, so we have to put the trick before leading to this ugly syntax CommonKeys<T> extends infer K1 ... to avoid
 // distribution !! :)))
-type Common<T, Depth extends number> = CommonKeys<T> extends infer K1 ? {
-    [ K in K1 & CommonKeys<T> ]: IsRecursivable<T[ K ]> extends true ? MergeReduce<T[ K ], Depth> : T[ K ]
+type Common<T, Level extends number> = CommonKeys<T> extends infer K1 ? {
+    [ K in K1 & CommonKeys<T> ]: IsRecursivable<T[ K ]> extends true ? MergeReduce<T[ K ], Level> : T[ K ]
 } : never;
 
 type NonCommonValue<T, K extends PropertyKey> = T extends Partial<Record<K, infer V>> ? keyof T extends never ? never : V : never;
 
 
-type NonCommon<T, Depth extends number> = NonCommonKeys<T> extends infer K1 ? {
+type NonCommon<T, Level extends number> = NonCommonKeys<T> extends infer K1 ? {
     // NonCommon properties must be optional as their are not in every type of the union
-    [ K in K1 & NonCommonKeys<T> ]?: IsRecursivable<T[ K ]> extends true ? MergeReduce<T[ K ], Depth> : NonCommonValue<T, K>
+    [ K in K1 & NonCommonKeys<T> ]?: IsRecursivable<T[ K ]> extends true ? MergeReduce<T[ K ], Level> : NonCommonValue<T, K>
 } : never;
 
 
 
 
-type Values<T extends {}> = T extends T ? {
+type Values<T extends object> = T extends T ? {
     [ K in keyof T ]: T[ K ];
 } : never;
 
@@ -55,13 +55,13 @@ type SpliceOne<Union> = ExcludeExact<Union, ExtractOne<Union>>;
 type ExtractOne<Union> = ExtractFuncParm<UnionFuncParamToIntersection<UnionToFuncParam<Union>>>;
 
 
-type MergeReduce<Union, Depth extends number = 5> = Depth extends 0 ? Union : MergeReduceImpl<Union, {}, Levels[ Depth ]>;
-type MergeReducer<T, Container, Depth extends number> = Merge<T | Container, Depth>;
-type Merge<T, Depth extends number> = Values<Common<T, Depth> & NonCommon<T, Depth>>;
+type MergeReduce<Union, Level extends number = 5> = Level extends 0 ? Union : MergeReduceImpl<Union, {}, Levels[ Level ]>;
+type MergeReducer<T, Container, Level extends number> = Merge<T | Container, Level>;
+type Merge<T, Level extends number> = Values<Common<T, Level> & NonCommon<T, Level>>;
 
-type MergeReduceImpl<Union, Container, Depth extends number> =
-    SpliceOne<Union> extends never ? MergeReducer<ExtractOne<Union>, Container, Depth>
-    : MergeReduceImpl<SpliceOne<Union>, MergeReducer<ExtractOne<Union>, Container, Depth>, Depth>;
+type MergeReduceImpl<Union, Container, Level extends number> =
+    SpliceOne<Union> extends never ? MergeReducer<ExtractOne<Union>, Container, Level>
+    : MergeReduceImpl<SpliceOne<Union>, MergeReducer<ExtractOne<Union>, Container, Level>, Level>;
 
 
 // !! See union-reducer for an an explaination and some examples of how the Reducer is working !!

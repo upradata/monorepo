@@ -1,6 +1,8 @@
-import { isDefinedProp } from './is';
+import { isDefinedProp, isPlainObject } from './is';
 import { ensureFunction } from './useful';
+
 import type { TT$ } from './types';
+
 
 type IfChainedValue<D, V> = V | ((data?: D) => V);
 type IfChainedCondition<D> = IfChainedValue<D, TT$<boolean>>;
@@ -40,10 +42,10 @@ export type IfChained = <D>(data?: D) => {
 };
 
 
-const _ifChained = <D = never>(data: D = undefined) => {
-    const isCallable = <T>(v: T | CallableValue<T>): v is CallableValue<T> => typeof v === 'object' && 'callable' in v;
+const _ifChained = <D = never>(data: D = undefined as D) => {
+    const isCallable = <T>(v: T | CallableValue<T>): v is CallableValue<T> => isPlainObject(v) && 'callable' in v;
 
-    const _if = <D, F>(data: D = undefined, finalValue: F = undefined, done: boolean = false) => ({
+    const _if = <D, F>(data: D = undefined as D, finalValue: F = undefined as F, done: boolean = false) => ({
         next: <T, E = never, N = never>(selector: IfChainedSelector<D, T, E, N>) => {
             // for TS typing, we are obliged to return in one place only
             // otherwise, TS will give the return type of next the "any" type

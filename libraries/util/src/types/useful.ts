@@ -10,6 +10,7 @@ export type RecordOf<T = any> = Record<Key, T>;
 export interface ObjectOf<T> {
     [ K: string ]: T;
     [ K: number ]: T;
+    [ K: symbol ]: T;
 }
 
 export type InferRecordType<O> = O extends { [ K in Key ]: infer U; } ? U : never;
@@ -18,11 +19,11 @@ export type InferArrayType<A> = A extends Arr<infer U> ? U : never;
 export type Typify<T> = { [ K in keyof T ]: T[ K ] };
 
 
-export type ValueOf<O extends {}> = O[ keyof O ];
+export type ValueOf<O extends object> = O[ keyof O ];
 
 export type PlainObj<T = any> = RecordOf<T>;
 
-export type RecordRecursive<O extends {}, Type> = {
+export type RecordRecursive<O extends object, Type> = {
     [ K in keyof O ]: O[ K ] extends Arr<any> ? Type : O[ K ] extends object ? RecordRecursive<O[ K ], Type> : Type
 };
 
@@ -141,7 +142,7 @@ export type Or<T, U> = T extends true ? true : U extends true ? true : false;
 
 export type And<T, U> = T extends true ? U extends true ? true : false : false;
 
-export type IsObject<T> = T extends {} ? T extends [] ? false : true : false;
+export type IsObject<T> = T extends object ? T extends [] ? false : true : false;
 
 
 

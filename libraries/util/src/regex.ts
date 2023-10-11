@@ -5,6 +5,7 @@
 
 /**
  * Converts a regular expression object or string to a string representation.
+ *
  * @param r - The regular expression object or string to convert.
  * @returns A string representation of the regular expression.
  */
@@ -13,6 +14,7 @@ export const regexToString = (r: string | RegExp) => typeof r === 'string' ? r :
 /**
  * Converts a regular expression string or object to a RegExp object.
  * If the input is already a RegExp object, returns the original object.
+ *
  * @param r - The regular expression string or object to convert.
  * @param flags - Optional flags to apply to the RegExp object.
  * @returns A RegExp object representing the regular expression.
@@ -26,15 +28,24 @@ export const mergeRegexesWithFlags = (...regexes: (RegExp | string)[]) => new Re
 
 /**
  * Options to customize the behavior of the `mergeRegexes` function.
- * @property flags - Optional flags to apply to the merged regular expression.
- * @property join - Optional string to use to join the regular expressions. Defaults to '|'.
- * @property groupify - Optional boolean to group each regular expression in a capturing group. Defaults to true.
- * @property groupAll - Optional boolean to group all regular expressions in a single capturing group. Defaults to false.
  */
 export interface MergeRexesOptions {
+    /** Optional flags to apply to the merged regular expression. */
     flags?: string;
+
+    /** Optional string to use to join the regular expressions.
+     * @defaultValue ''
+     */
     join?: string;
+
+    /** Optional boolean to group each regular expression in a capturing group.
+     * @defaultValue false
+     */
     groupify?: boolean;
+
+    /** Optional boolean to group the whole regular expression in a capturing group.
+     * @defaultValue false
+     */
     groupAll?: boolean;
 }
 
@@ -49,10 +60,10 @@ export const mergeRegexes = (regexes: (RegExp | string)[], options: MergeRexesOp
     const openGroup = (isEnabled: boolean) => isEnabled ? '(' : '';
     const closeGroup = (isEnabled: boolean) => isEnabled ? ')' : '';
 
-    const { groupify, groupAll, join, flags } = options;
+    const { groupify = false, groupAll = false, join = '', flags } = options;
 
     return new RegExp(
-        `${openGroup(groupAll)}${regexes.map(r => `${openGroup(groupify)}${regexToString(r)}${closeGroup(groupify)}`).join(join || '')}${closeGroup(groupAll)}`,
+        `${openGroup(groupAll)}${regexes.map(r => `${openGroup(groupify)}${regexToString(r)}${closeGroup(groupify)}`).join(join)}${closeGroup(groupAll)}`,
         flags
     );
 };
@@ -61,7 +72,7 @@ export const mergeRegexes = (regexes: (RegExp | string)[], options: MergeRexesOp
 /**
  * A regular expression that matches email addresses.
  */
-export const EMAIL_REGEXP = /^[-!#$%&'*+\/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+\/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
+export const EMAIL_REGEXP = /^[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
 
 /**
  * A regular expression that matches email addresses wrapped in angle brackets, with optional leading and trailing whitespace.

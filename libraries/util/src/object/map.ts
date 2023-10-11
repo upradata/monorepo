@@ -1,6 +1,5 @@
-/* eslint-disable no-redeclare */
-import { Constructor, AnyFunction } from '../function';
-import { ValueOf, Arr, Key } from '../types';
+import type { AnyFunction, Constructor } from '../function';
+import type { Arr, Key, ValueOf } from '../types';
 
 
 // create object from keys
@@ -17,7 +16,7 @@ type MakeObjectKlassHandler<Klass extends Constructor> = (key: keyof InstanceTyp
 
 // input is an object
 // handler returns a value
-type MakeObjectObjHandler<O extends {}> = (key: keyof O, value?: ValueOf<O>, arg?: O) => any;
+type MakeObjectObjHandler<O extends object> = (key: keyof O, value?: ValueOf<O>, arg?: O) => any;
 
 // input is an array with keys
 // handler returns a value
@@ -33,15 +32,29 @@ type MakeObjectReturn<V extends AnyFunction, T> = ReturnType<V> extends { key: a
     Record<keyof T, ReturnType<V>>;
 
 
-export function makeObject<Klass extends Constructor, V extends MakeObjectKlassHandler<Klass>>(klass: Klass, value: V): MakeObjectReturn<V, InstanceType<Klass>>;
+export function makeObject<Klass extends Constructor, V extends MakeObjectKlassHandler<Klass>>(
+    klass: Klass, value: V
+): MakeObjectReturn<V, InstanceType<Klass>>;
 
-export function makeObject<Values extends Arr<any>, V extends MakeObjectArrayHandlerWithValues<Values>>(k: Values, value: V): Record<ReturnType<V>[ 'key' ], ReturnType<V>[ 'value' ]>;
+// eslint-disable-next-line no-redeclare
+export function makeObject<Values extends Arr<any>, V extends MakeObjectArrayHandlerWithValues<Values>>(
+    k: Values, value: V
+): Record<ReturnType<V>[ 'key' ], ReturnType<V>[ 'value' ]>;
 
-export function makeObject<Keys extends Arr<Key>, V extends MakeObjectArrayHandlerWithKeys<Keys>>(k: Keys, value: V): Record<Keys[ number ], ReturnType<V>>;
+// eslint-disable-next-line no-redeclare
+export function makeObject<Keys extends Arr<Key>, V extends MakeObjectArrayHandlerWithKeys<Keys>>(
+    k: Keys, value: V
+): Record<Keys[ number ], ReturnType<V>>;
 
-export function makeObject<O extends {}, V extends MakeObjectObjHandler<O>>(obj: O, value: V): MakeObjectReturn<V, O>;
+// eslint-disable-next-line no-redeclare
+export function makeObject<O extends object, V extends MakeObjectObjHandler<O>>(
+    obj: O, value: V
+): MakeObjectReturn<V, O>;
 
-export function makeObject(arg: Key[] | object | Constructor, value: (k: Key, valueOrArg: any, arg?: object) => any): object {
+// eslint-disable-next-line no-redeclare
+export function makeObject(
+    arg: Key[] | object | Constructor, value: (k: Key, valueOrArg: any, arg?: object) => any
+): object {
     const values = Array.isArray(arg) ? arg : arg.constructor && typeof arg === 'function' ? new (arg as Constructor)() : arg;
     const keys = Array.isArray(arg) ? arg : Object.keys(values);
 

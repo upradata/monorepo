@@ -37,7 +37,7 @@ type NonCommonValues<T> = NonCommonKeys<T> extends infer K1 ? {
 
 
 
-type Values<T extends {}> = T extends T ? {
+type Values<T extends object> = T extends T ? {
     [ K in keyof T ]: T[ K ];
 } : never;
 

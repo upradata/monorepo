@@ -21,7 +21,7 @@ export class StyleOptions {
 export class Style {
     static get [ Symbol.species ]() { return Style; }
     public transforms: Array<StyleTransform | { mode: StyleMode; transform: StyleTransform; } | Style> = [];
-    public mode: StyleMode = undefined;
+    public mode: StyleMode = 'null';
     public flatten?: StyleFlatten = undefined;
     flattenIfNoTransforms?: StyleFlatten = undefined;
 
@@ -78,7 +78,7 @@ export class Style {
     }
 
 
-    add(...transforms: StyleOptions[ 'transforms' ]): Style {
+    add(...transforms: Style[ 'transforms' ]): Style {
         this.transforms = [ ...this.transforms, ...transforms ];
         return this;
     }
@@ -152,6 +152,6 @@ export class Style {
 export const stringify = new Style({ flatten: recreateString });
 export const flattenStringStyle = stringify;
 
-export function style(...transforms: StyleOptions[ 'transforms' ]) {
+export function style(...transforms: Style[ 'transforms' ]) {
     return new Style({ transforms });
 }

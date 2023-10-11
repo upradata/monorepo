@@ -9,9 +9,11 @@
  * The types include a generic constructor type and several type aliases for arrays and object keys.
  */
 
-import type { Constructor } from './function';
 import { isArray, isDefined, isPromise } from './is';
-import type { Key, InferArrayType, Arr, TT$ } from './types';
+
+import type { Constructor } from './function';
+import type { Arr, InferArrayType, Key, TT$ } from './types';
+
 
 // chain(() => o.a.b.c) ==> if a prop doesn't exist ==> return defaultValue
 // Now it is not necessary anymore with o?.a syntax
@@ -22,7 +24,7 @@ import type { Key, InferArrayType, Arr, TT$ } from './types';
  * @param defaultValue - The default value to return if any property in the chain is undefined or null.
  * @returns The value of the nested property, or the default value if any property in the chain is undefined or null.
  */
-export function chain<T>(exp: () => T, defaultValue: T = undefined) {
+export function chain<T>(exp: () => T, defaultValue: T = undefined as T) {
     try {
         return exp();
     } catch (e) {
@@ -87,7 +89,7 @@ type Filler<T> = (i: number) => T;
  * @param v - The value to ensure as a function.
  * @returns The original function if it is already a function, or a new function that returns the value if it is not a function.
  */
-export const arrayN = <T = any>(n: number, fill: T | Filler<T> = undefined): T[] => {
+export const arrayN = <T = any>(n: number, fill: T | Filler<T> = undefined as T): T[] => {
     const filler: Filler<T> = typeof fill === 'function' ? fill as Filler<T> : _i => fill;
 
     const create = (array: T[], i: number): T[] => {
@@ -172,15 +174,15 @@ export const poll = <S, E>(handler: () => TT$<{ stop: boolean; error?: E; succes
     const { duration, timeStep = 100 } = options;
     let totalWait = 0;
 
-    return new Promise<S>((res, rej) => {
+    return new Promise<S>((resolve, reject) => {
         const id = setInterval(async () => {
             const { error, success, stop } = await handler();
 
             if (stop) {
-                res(success);
+                resolve(success as S);
                 clearInterval(id);
             } else if (totalWait > duration) {
-                rej(error);
+                reject(error);
                 clearInterval(id);
             }
 

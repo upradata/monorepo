@@ -1,5 +1,6 @@
-import type { Arr } from './types';
 import { arrayN } from './useful';
+
+import type { Arr } from './types';
 
 
 export type Function0<R = any> = () => R;

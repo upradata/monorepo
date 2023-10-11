@@ -21,7 +21,8 @@ import { Constructor, AnyFunction } from './function';
 export class Base {
 
     initialize<T extends Base>(props?: Partial<T>) {
-        props && Object.assign(this, props);
+        if (props)
+            Object.assign(this, props);
     }
 
 

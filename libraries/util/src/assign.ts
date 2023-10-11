@@ -1,14 +1,15 @@
 import { objectToString } from './format-string';
-import { PlainObj, Key, ObjectOf, MergeRecursive, PartialRecursive } from './types';
-import { isDefined, isNil, isNumber, isUndefined } from './is';
 import { Constructor } from './function';
+import { isDefined, isNil, isNumber, isUndefined } from './is';
+
+import type { Key, MergeRecursive, ObjectOf, PartialRecursive, PlainObj } from './types';
 
 
 export type AssignMode = 'of' | 'in';
 export type ArrayMode = 'merge-recursive' | 'replace' | 'concat';
 
 export type AssignOpts = Partial<Omit<AssignOptions, 'onlyExistingProp' | 'nonRecursivelyAssignableTypes'> & {
-    onlyExistingProp: boolean | { level: number; };
+    onlyExistingProp: boolean | { level?: number; };
     nonRecursivelyAssignableTypes: Iterable<Constructor>;
     array: ArrayMode | 'primitive';
     object: 'own-properties' | 'all-prototype-chain';
@@ -19,10 +20,10 @@ export class AssignOptions {
     arrayMode: ArrayMode = 'merge-recursive';
     depth: number = Infinity;
     onlyExistingProp: { level: number; };
-    props: (string | symbol)[] = undefined;
-    except: (string | symbol)[] = undefined;
-    accept: (key: string | symbol, value: any) => boolean = undefined;
-    transform: (key: string | symbol, value: any) => any = undefined;
+    props: Key[] | undefined = undefined;
+    except: Key[] | undefined = undefined;
+    accept: ((key: Key, value: any) => boolean) | undefined = undefined;
+    transform: ((key: Key, value: any) => any) | undefined = undefined;
     nonRecursivelyAssignableTypes: Set<Constructor>;
 
 
@@ -88,7 +89,7 @@ class Assign {
         return isNumber(this.options.depth) && this.options.depth === 1;
     }
 
-    private assignProp(prop: string, to: any, from: ObjectOf<any> | (() => any), outWasPrimitive: boolean) {
+    private assignProp(prop: Key, to: any, from: ObjectOf<any> | (() => any), outWasPrimitive: boolean) {
         const { onlyExistingProp, props, except, accept, transform } = this.options;
 
         const getFrom = () => {
@@ -97,8 +98,8 @@ class Assign {
         };
 
         if (except) {
-            const property = this.findDotProp(prop, except) as string;
-            if (property?.split('.').pop() === prop)
+            const property = this.findDotProp(prop, except);
+            if (property?.toString().split('.').at(-1) === prop)
                 return;
         }
 
@@ -122,25 +123,24 @@ class Assign {
         }
     }
 
-    private findDotProp(property: string, props: (string | symbol)[]) {
+    private findDotProp(property: Key, props: Key[] | undefined): Key | undefined {
         if (isUndefined(props))
             return undefined;
 
-        let foundProp: (string | symbol) = undefined;
+        const findProp = () => {
+            for (const p of props) {
+                let prop = p;
 
-        for (const p of props) {
-            let prop = p;
+                prop = p.toString().split('.')[ this.currentlevel ];
 
-            if (typeof p === 'string')
-                prop = p.split('.')[ this.currentlevel ];
-
-            if (prop === property) {
-                foundProp = p;
-                break;
+                if (prop === property) {
+                    return p;
+                }
             }
-        }
 
-        return foundProp;
+        };
+
+        return findProp();
     }
 
     assignRecursive(currentLevel: number = 0, fromPrimitive: boolean = false) {
@@ -209,7 +209,7 @@ class Assign {
 
 
 
-const splitArgs = <T extends any[]>(args: T): { out: ObjectOf<any>; ins: ObjectOf<any>[]; options: AssignOptions; } => {
+const splitArgs = <T extends any[]>(args: T): { out: ObjectOf<any>; ins: ObjectOf<any>[]; options: AssignOptions | undefined; } => {
     const [ out, ...ins ] = args;
 
     if (isAssignOptions(ins[ ins.length - 1 ])) {
@@ -257,9 +257,11 @@ export function assignRecursiveIn<T extends any[], R = never>(...args: T): Retur
 }
 
 
-export function assignDefaultOption<T>(defaultOption: T, option: PartialRecursive<T>, assignMode: AssignOpts = { assignMode: 'in', arrayMode: 'merge-recursive' }): T {
+export function assignDefaultOption<T>(
+    defaultOption: T, option: PartialRecursive<T>, assignMode: AssignOpts = { assignMode: 'in', arrayMode: 'merge-recursive' }
+): T {
     return assignRecursiveArray([ {}, defaultOption, option ], assignMode) as any;
 }
 
 
-export const deepCopy = <O extends {}>(o: O, options?: AssignOptions): O => assignRecursive({}, o, options) as any as O;
+export const deepCopy = <O extends object>(o: O, options?: AssignOptions): O => assignRecursive({}, o, options) as any as O;
