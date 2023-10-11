@@ -6,9 +6,9 @@ import type { CacheMock } from './mocks/cache.mock';
 
 
 describe('Test suite for cache', () => {
-    // @ts-expect-error
+    // @ts-expect-error will be defined
     let mockFSData: MockFSData = undefined;
-    // @ts-expect-error
+    // @ts-expect-error will be defined
     let Cache: typeof CacheMock = undefined;
 
     beforeAll(() => {
@@ -18,24 +18,25 @@ describe('Test suite for cache', () => {
     });
 
     afterAll(() => {
+        // eslint-disable-next-line @rushstack/hoist-jest-mock
         jest.unmock('fs');
     });
 
     it('should add files to cache, save it and load it back', () => {
-        const { cache, collectionObject } = new Cache({ mockFSData: mockFSData }).populateCache();
+        const { cache, collectionObject } = new Cache({ mockFSData }).populateCache();
 
         // const allFiles = glob.sync('**/*', { cwd: root }).map(file => path.join(root, file));
         expect(cache.store.storeCollection.toObject()).toEqual(collectionObject);
 
         cache.save();
-        const cacheLoaded = new Cache({ mockFSData: mockFSData }).createCache();
+        const cacheLoaded = new Cache({ mockFSData }).createCache();
         expect(cacheLoaded.store.storeCollection.toObject()).toEqual(collectionObject);
 
     });
 
     it('should return changedFiles', () => {
         mockFSData.clean();
-        const { cache, files, collectionNames } = new Cache({ mockFSData: mockFSData }).populateCache();
+        const { cache, files, collectionNames } = new Cache({ mockFSData }).populateCache();
         const filepaths = files.map(f => f.path);
 
         // Files already exist in the filesystem and the cache
@@ -64,7 +65,7 @@ describe('Test suite for cache', () => {
         const md5 = require('../store').md5 as (filePath: string, size?: number) => string;
 
         const cacheMock = new Cache({
-            mockFSData: mockFSData,
+            mockFSData,
             cache: { criteria: 'md5' },
             mock: { criteria: (i, file) => md5(file.path) }
         });
@@ -109,7 +110,7 @@ describe('Test suite for cache', () => {
 
     it('should use function criteria and isSameComparator function', () => {
         const { cache, files, collectionObject } = new Cache({
-            mockFSData: mockFSData,
+            mockFSData,
             cache: { criteria: path => mockFSData.files[ path ].contents!.toString()[ 0 ] },
             mock: { criteria: (i, file) => file.contents!.toString()[ 0 ] }
         }).populateCache();
@@ -138,7 +139,7 @@ describe('Test suite for cache', () => {
     });
 
     it('should delete collections', () => {
-        const { cache } = new Cache({ mockFSData: mockFSData }).populateCache();
+        const { cache } = new Cache({ mockFSData }).populateCache();
 
         cache.deleteCollection('collectionName3.collectionName32');
         cache.deleteCollection('collectionName3.doNotExist');
@@ -149,7 +150,7 @@ describe('Test suite for cache', () => {
     });
 
     it('should delete files', () => {
-        const { cache, files } = new Cache({ mockFSData: mockFSData }).populateCache();
+        const { cache, files } = new Cache({ mockFSData }).populateCache();
 
         cache.deleteFile('collectionName1', files[ 0 ].path, files[ 2 ].path);
         cache.deleteFile('collectionName3.collectionName32', files[ 7 ].path);

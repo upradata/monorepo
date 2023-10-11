@@ -1,8 +1,7 @@
 import { assignRecursive, Function2, ObjectOf } from '@upradata/util';
 
 import type FS from 'fs-extra';
-import MemoryFS from 'memory-fs';
-/* eslint-disable global-require */
+import type MemoryFS from 'memory-fs';
 import type VinylFile from 'vinyl';
 
 
@@ -17,14 +16,24 @@ export interface MockFSData {
 
 export const mockFs = (): MockFSData => {
     const MemoryFs = require('memory-fs') as typeof MemoryFS;
+    // variables starting with "mock" will not throw if there are used inside jest.mock even though there are not hoisted
+    // https://github.com/kulshekhar/ts-jest/issues/1088
     let mockedFS: typeof FS | undefined = undefined;
+    const mockFiles: ObjectOf<VinylFile> = {};
 
     // will be hoisted in the function "mockFs"
     // 'fs-extra' is using 'graceful-fs' under the hood that is using 'fs'. Here we will use an in-memory filesystem
+
+    // eslint-disable-next-line @rushstack/hoist-jest-mock
     jest.mock('fs', () => {
+        const fs = jest.requireActual('fs') as typeof import('fs');
+
         const makeAsync = (fn: string | Function2<string, any>) => {
+
             function make(path: string, callback: Function2<Error, any>): void;
+            // eslint-disable-next-line no-redeclare
             function make(path: string, option: any, callback: Function2<Error | null, any>): void;
+            // eslint-disable-next-line no-redeclare
             function make(path: string, optionOrCb: Function2<Error | null, any> | any, callback?: Function2<Error | null, any>): void {
                 let cb = callback;
                 let opts = optionOrCb;
@@ -59,16 +68,18 @@ export const mockFs = (): MockFSData => {
         MemoryFsAny.prototype.lstatSync = MemoryFs.prototype.statSync;
         // MemoryFsAny.prototype.realpath = () => { };
 
-        const oldStatSync = MemoryFsAny.prototype.statSync;
+        const oldStatSync = MemoryFs.prototype.statSync;
         MemoryFs.prototype.statSync = function (path: string) {
-            let stats = undefined;
+            let stats: Partial<ReturnType<MemoryFS[ 'statSync' ]>>;
 
             try {
                 stats = oldStatSync.call(fs, path);
-            } catch (e) { }
+            } catch (e) {
+                stats = {};
+            }
 
             const files = mockFiles;
-            return assignRecursive(stats || {}, files[ path ]?.stat);
+            return assignRecursive(stats, files[ path ]?.stat);
         };
 
         // MemoryFs does not implement the options parameter
@@ -86,14 +97,14 @@ export const mockFs = (): MockFSData => {
         MemoryFsAny.__instance__ = new MemoryFs();
         MemoryFsAny.__instance__.debug = 'MemoryFs';
 
-        /** 
+        /**
          * fs is mocked as MemoryFs, that is a class. The problem is that it is an es6 class and when an instance is created,
          * the method in the prototype are not enumerable.
-         * 
+         *
          * So, when fs-extra is created, it is calling graceful-js that is calling "patch(clone(fs))"
-         * and try to copy all 'fs' method, it cannot parse the methods of fs.__proto__ 
+         * and try to copy all 'fs' method, it cannot parse the methods of fs.__proto__
          * (even prototype is not enumerable - no Object.keys or whatever).
-         * 
+         *
          * So I am obliged to recreate it by hand
          */
 
@@ -104,33 +115,28 @@ export const mockFs = (): MockFSData => {
                 MemoryFsAny.__instance__[ k ] = MemoryFs.prototype[ k ];
         }
 
-        const fs = jest.requireActual('fs') as typeof import('fs');
-
         for (const k of Object.getOwnPropertyNames(fs)) {
             if (typeof fs[ k ] === 'function' && !MemoryFsAny.__instance__[ k ])
                 MemoryFsAny.__instance__[ k ] = fs[ k ];
         }
 
-        // console.log(`_________ MemoryFsAny.__instance__ ___________________________________`);
+        // console.log(`_________ MemoryFsAny.__instance __________________`);
 
         mockedFS = MemoryFsAny.__instance__;
         return MemoryFsAny.__instance__;
     });
 
 
-    const fs = require('fs-extra') as typeof FS;
+    const fsExtra = require('fs-extra') as typeof FS;
 
-    // variables starting with "mock" will not throw if there are used inside jest.mock even though there are not hoisted
-    // https://github.com/kulshekhar/ts-jest/issues/1088
-    const mockFiles: ObjectOf<VinylFile> = {};
 
     const addOrUpdateFile = (file: VinylFile) => {
         mockFiles[ file.path ] = file;
 
         if (file.stat?.isDirectory())
-            fs.mkdirp(file.path);
+            fsExtra.mkdirpSync(file.path);
         else
-            fs.outputFileSync(file.path, file.contents?.toString() || '');
+            fsExtra.outputFileSync(file.path, file.contents?.toString() || '');
     };
 
     const deleteFile = (filepath: string) => {
@@ -144,13 +150,11 @@ export const mockFs = (): MockFSData => {
     const clean = () => {
         for (const file of Object.values(mockFiles)) {
             if (file.stat?.isDirectory())
-                fs.rmdirSync(file.path);
+                fsExtra.rmdirSync(file.path);
             else
-                fs.unlinkSync(file.path);
+                fsExtra.unlinkSync(file.path);
         }
 
-        // eslint-disable-next-line no-multi-assign
-        // (MemoryFs as any).__files__ = files = {};
         for (const k of Object.keys(mockFiles))
             delete mockFiles[ k ];
     };

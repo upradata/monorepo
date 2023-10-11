@@ -5,7 +5,7 @@ import type { CollectionObject, FilePrint, StoreCollection as StoreCollectionTyp
 
 
 describe('Test suite for StoreCollection', () => {
-    // @ts-expect-error
+    // @ts-expect-error will be defined
     let StoreCollection: typeof StoreCollectionType = undefined;
 
     beforeAll(() => {
@@ -15,6 +15,7 @@ describe('Test suite for StoreCollection', () => {
     });
 
     afterAll(() => {
+        // eslint-disable-next-line @rushstack/hoist-jest-mock
         jest.unmock('fs');
     });
 
@@ -106,18 +107,13 @@ describe('Test suite for StoreCollection', () => {
 
 
 
-
-
-
-
-
     it('should add a FilePrint in a new shallow collection', () => {
         const storeCollection = createStoreCollection();
         const filePrint: FilePrint = { mtime: 123465789, criteria: 'bonjour' };
 
         storeCollection.addFilePrint('key1', filePrint, 'collectionName');
 
-        expect((storeCollection.collection[ 'collectionName' ] as StoreCollectionType).collection.key1 as FilePrint).toEqual(filePrint);
+        expect((storeCollection.collection.collectionName as StoreCollectionType).collection.key1 as FilePrint).toEqual(filePrint);
         expect(storeCollection.getCollection('collectionName')?.collection.key1).toEqual(filePrint);
     });
 

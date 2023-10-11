@@ -3,7 +3,6 @@ import { warn } from './common';
 import { File, GlobFiles } from './glob-files';
 import { CacheChangeOptions, Store, StoreOpts } from './store';
 
-
 export class CacheOpts {
     verbose?: boolean = true;
 }
@@ -65,7 +64,6 @@ export class Cache {
         return this.store.getCollection(...ensureArray(collectionName)) ? this.fileNamesInCollection(collectionName, files) : files;
     } */
 
-
     public addOrUpdateFile(collectionName: string | string[], ...files: File[]) {
         const fileNames = this.processGlobs(files, { method: 'addOrUpdateFile', verbose: true });
         // const collectionFiles = this.fileNamesInCollectionIfExistElseFiles(collectionName, fileNames);
@@ -112,6 +110,7 @@ export class Cache {
         return [];
     }
 
+    // eslint-disable-next-line default-param-last
     public changedFiles(collectionName?: string | string[], files: File[] = [], options?: CacheChangeOptions): string[] {
         const opts = new CacheChangeOptions({ ...options, verbose: isDefined(options?.verbose) ? options?.verbose : this.options.verbose });
 

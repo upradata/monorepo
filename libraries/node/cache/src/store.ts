@@ -1,5 +1,5 @@
 import { findUpDir } from '@upradata/find-up';
-import { chain, ensureArray, isDefined, isUndefined, PartialRecursive } from '@upradata/util';
+import { ensureArray, isDefined, isUndefined, PartialRecursive } from '@upradata/util';
 import fs from 'fs-extra';
 import crypto from 'node:crypto';
 import path from 'node:path';
@@ -122,7 +122,7 @@ export class Store {
         if (collectionName.length === 0)
             return [ ...this.filePrintIterator() ];
 
-        const { recursive } = Object.assign({}, this.options, options);
+        const { recursive } = { ...this.options, ...options };
 
         if (recursive)
             return [ ...this.filePrintIterator(...collectionName) ];
@@ -130,7 +130,7 @@ export class Store {
         const storeCollection = this.getCollection(...collectionName);
 
         return isUndefined(storeCollection) ? [] : Object.entries(storeCollection.collection)
-            .filter(([ key, value ]) => isFilePrint(value))
+            .filter(([ _key, value ]) => isFilePrint(value))
             .map(([ key, value ]) => {
                 const fileprint = value as FilePrint;
 
@@ -171,8 +171,8 @@ export class Store {
         return isFilePrint(fileprint) ? fileprint : undefined;
     }
 
-    public fileHasChanged(filepath: string, collectionName: string[] = [], options?: CacheChangeOptions) {
-        const opts = Object.assign({}, this.options, options);
+    public fileHasChanged(filepath: string, collectionName: string[] = [], options: CacheChangeOptions = {}) {
+        const opts = { ...this.options, ...options };
 
         const getCollections = () => {
             if (opts.recursive) {
@@ -208,6 +208,7 @@ export class Store {
             return !this.options.isSameComparator(filepath, fileprint);
         }
 
+        // eslint-disable-next-line no-unneeded-ternary
         return opts.onlyExistingFiles ? false : true;
     }
 

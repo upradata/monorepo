@@ -1,4 +1,4 @@
-import { AssignOptions, assignRecursive, ensureArray } from '@upradata/util';
+import { AssignOptions, PartialRecursive, assignRecursive, ensureArray } from '@upradata/util';
 import VinylFile from 'vinyl';
 import { Cache, CacheOptions } from '../../cache';
 
@@ -23,7 +23,7 @@ export class CacheMock {
     collectionObject: CollectionObject = {};
     collectionNames: string[] = [];
     collectionUniqueNames: string[] = [];
-    options: CacheMockOptions;
+    options: PartialRecursive<CacheMockOptions>;
 
     constructor(options: CacheMockOptions) {
         this.options = assignRecursive(
@@ -103,7 +103,7 @@ export class CacheMock {
     }
 
     populateCache() {
-        const files = this.generateFiles(this.options.mock?.nb!);
+        const files = this.generateFiles(this.options.mock!.nb!);
 
         this.addEntries({ files, collectionName: 'collectionName1', indexes: [ 0, 1, 2 ] });
         this.addEntries({ files, collectionName: 'collectionName2', indexes: [ 3, 4 ] });

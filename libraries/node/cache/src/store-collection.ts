@@ -10,12 +10,13 @@ export interface FilePrint {
 
 
 export function isFilePrint(v: any): v is FilePrint {
-    return isDefined(v) && isDefined(v.mtime) && typeof v.mtime === 'number';
+    const value = v as FilePrint | undefined;
+    return isDefined(value) && isDefined(value.mtime) && typeof value.mtime === 'number';
 }
 
-export type WalkActionBefore = (args: { node: StoreCollection | FilePrint, name: string, isLast: boolean; }) => any;
+export type WalkActionBefore = (args: { node: StoreCollection | FilePrint; name: string; isLast: boolean; }) => any;
 export type WalkActionAfter<R> = (
-    args: { parentCollection: StoreCollection; node: StoreCollection | FilePrint, name: string, isLast: boolean; }
+    args: { parentCollection: StoreCollection; node: StoreCollection | FilePrint; name: string; isLast: boolean; }
 ) => R | undefined;
 
 
@@ -35,7 +36,7 @@ export class StoreCollection {
         const content = JSON.parse(fs.readFileSync(this.path, { encoding: 'utf8' })) as CollectionObject;
 
         const loadCollection = (storeCollection: StoreCollection, content: CollectionObject) => {
-            const collection = storeCollection.collection;
+            const { collection } = storeCollection;
 
             for (const [ key, value ] of Object.entries(content)) {
                 if (isFilePrint(value))
@@ -189,7 +190,7 @@ export class StoreCollection {
 
     * collectionIterator(): IterableIterator<{ fromName: string; name: string; collection: StoreCollection; }> {
 
-        for (const [ key, node ] of Object.entries(this.collection)) {
+        for (const [ , node ] of Object.entries(this.collection)) {
             if (!isFilePrint(node)) {
                 yield { fromName: this.collectionName, name: node.collectionName, collection: node };
                 yield* node.collectionIterator();
