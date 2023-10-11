@@ -497,7 +497,19 @@
             "projectFolder": "heft-plugins/heft-typescript-plugin",
             "reviewCategory": "rush",
             "shouldPublish": true
-            /* "cyclicDependencyProjects": [
+        },
+        {
+            "packageName": "@upradata/eslint-config",
+            "projectFolder": "eslint/eslint-config",
+            "reviewCategory": "rush",
+            "shouldPublish": false
+        },
+        {
+            "packageName": "@upradata/heft-lint-plugin",
+            "projectFolder": "heft-plugins/heft-lint-plugin",
+            "reviewCategory": "libraries",
+            "shouldPublish": false /* ,
+            "cyclicDependencyProjects": [
                 "@rushstack/heft-node-rig"
             ] */
         }
