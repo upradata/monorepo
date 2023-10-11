@@ -33,6 +33,12 @@ function readPackage(packageJson, context) {
   //  context.log('Fixed up dependencies for @types/karma');
   //  packageJson.dependencies['log4js'] = '0.6.38';
   // }
+  /* if (packageJson.dependencies?.[ ' eslint-plugin-import' ]) {
+    console.log('Fixed up dependencies for eslint-plugin-import');
+    console.log(`eslint-plugin-import --> eslint-plugin-i@latest`);
+
+    packageJson.dependencies[ ' eslint-plugin-import' ] = 'npm:eslint-plugin-i@latest';
+  } */
 
   return packageJson;
 }

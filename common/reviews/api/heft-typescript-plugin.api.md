@@ -18,27 +18,17 @@ export interface IChangedFilesHookOptions {
 }
 
 // @beta (undocumented)
-export interface IEmitModuleKind {
-    // (undocumented)
-    jsExtension?: 'js' | 'cjs' | 'mjs';
-    // (undocumented)
-    jsExtensionOverride?: string;
-    // (undocumented)
-    moduleKind: Exclude<keyof typeof TTypescript.ModuleKind, 'None'>;
-    // (undocumented)
-    outFolderName: string;
-    // (undocumented)
-    target?: keyof typeof TTypescript.ScriptTarget;
-}
-
-// @beta (undocumented)
 export interface IPartialTsconfig {
+    // (undocumented)
+    [key: string]: any;
     // (undocumented)
     compilerOptions?: IPartialTsconfigCompilerOptions;
 }
 
 // @beta (undocumented)
 export interface IPartialTsconfigCompilerOptions {
+    // (undocumented)
+    [key: string]: any;
     // (undocumented)
     outDir?: string;
 }
@@ -53,16 +43,30 @@ export interface IStaticAssetsCopyConfiguration {
     includeGlobs: string[];
 }
 
+// @public (undocumented)
+export interface ITsConfigJson {
+    // (undocumented)
+    compilerOptions?: TTypescript.CompilerOptions;
+}
+
+// @beta (undocumented)
+export interface ITypescriptConfig {
+    // (undocumented)
+    isPrimary?: boolean;
+    // (undocumented)
+    jsExtension?: 'js' | 'cjs' | 'mjs';
+    // (undocumented)
+    tsconfigJson?: ITsConfigJson;
+    // (undocumented)
+    tsconfigPath: string;
+}
+
 // @beta (undocumented)
 export interface ITypeScriptConfigurationJson {
-    additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
     buildProjectReferences?: boolean;
-    emitCjsExtensionForCommonJS?: boolean | undefined;
-    emitMjsExtensionForESModule?: boolean | undefined;
-    project?: string;
     staticAssetsToCopy?: IStaticAssetsCopyConfiguration;
+    tsconfigs: ITypescriptConfig[];
     useTranspilerWorker?: boolean;
-    useTsconfigAsBase?: boolean;
 }
 
 // @beta (undocumented)
@@ -72,10 +76,10 @@ export interface ITypeScriptPluginAccessor {
 }
 
 // @beta (undocumented)
-export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined): Promise<IPartialTsconfig | undefined>;
+export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined): Promise<IPartialTsconfig[]>;
 
 // @beta (undocumented)
-export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<ITypeScriptConfigurationJson | undefined>;
+export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<ITypeScriptConfigurationJson>;
 
 // @public
 export const TypeScriptPluginName: 'typescript-plugin';

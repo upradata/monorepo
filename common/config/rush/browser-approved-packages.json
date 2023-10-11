@@ -8,6 +8,22 @@
     },
     {
       "name": "@rushstack/eslint-config",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "@rushstack/eslint-patch",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@rushstack/eslint-plugin",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "@rushstack/eslint-plugin-packlets",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@rushstack/eslint-plugin-security",
       "allowedCategories": [ "rush" ]
     },
     {
@@ -15,23 +31,59 @@
       "allowedCategories": [ "libraries", "rush" ]
     },
     {
+      "name": "@rushstack/heft-api-extractor-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/heft-config-file",
       "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@rushstack/heft-jest-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/heft-lint-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "rush" ]
     },
     {
+      "name": "@rushstack/heft-typescript-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/node-core-library",
-      "allowedCategories": [ "rush" ]
+      "allowedCategories": [ "libraries", "rush" ]
     },
     {
       "name": "@schemastore/package",
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@typescript-eslint/eslint-plugin",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@typescript-eslint/experimental-utils",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@typescript-eslint/parser",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "@typescript-eslint/typescript-estree",
+      "allowedCategories": [ "rush" ]
+    },
+    {
       "name": "@upradata/cache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/eslint-config",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -43,8 +95,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@upradata/heft-node-rig",
+      "name": "@upradata/heft-lint-plugin",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/heft-node-rig",
+      "allowedCategories": [ "libraries", "rush" ]
     },
     {
       "name": "@upradata/heft-typescript-plugin",
@@ -104,7 +160,59 @@
     },
     {
       "name": "eslint",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-config-airbnb",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-config-airbnb-base",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "eslint-config-prettier",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-define-config",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-import-resolver-exports",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-import-resolver-typescript",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-plugin-i",
+      "allowedCategories": [ "rush" ]
+    },
+    {
+      "name": "eslint-plugin-import",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-plugin-jsx-a11y",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-plugin-prettier",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-promise",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-plugin-react",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "eslint-plugin-tsdoc",
+      "allowedCategories": [ "libraries", "rush" ]
     },
     {
       "name": "fs-extra",
@@ -144,7 +252,7 @@
     },
     {
       "name": "semver",
-      "allowedCategories": [ "rush" ]
+      "allowedCategories": [ "libraries", "rush" ]
     },
     {
       "name": "shx",
@@ -156,7 +264,7 @@
     },
     {
       "name": "tapable",
-      "allowedCategories": [ "rush" ]
+      "allowedCategories": [ "libraries", "rush" ]
     },
     {
       "name": "ts-jest",
@@ -176,6 +284,10 @@
     },
     {
       "name": "tslib",
+      "allowedCategories": [ "libraries", "rush" ]
+    },
+    {
+      "name": "tslint",
       "allowedCategories": [ "libraries" ]
     },
     {
