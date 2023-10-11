@@ -5,6 +5,15 @@
     "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
     "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
     "phasesByName": {
+        "lint": {
+            "tasksByName": {
+                "eslint": {
+                    "taskPlugin": {
+                        "pluginPackage": "@upradata/heft-lint-plugin"
+                    }
+                }
+            }
+        },
         "build": {
             "cleanFiles": [
                 {
@@ -22,6 +31,14 @@
                 "typescript": {
                     "taskPlugin": {
                         "pluginPackage": "@upradata/heft-typescript-plugin"
+                    }
+                },
+                "lint": {
+                    "taskDependencies": [
+                        "typescript"
+                    ],
+                    "taskPlugin": {
+                        "pluginPackage": "@upradata/heft-lint-plugin"
                     }
                 }
             }

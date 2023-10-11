@@ -2,30 +2,31 @@
     // will be installed to node_modules/@rushstack/heft-node-rig/lib of the consuming project
     "$schema": "http://json.schemastore.org/tsconfig",
     "compilerOptions": {
-        "outDir": "../../../../../lib",
         "rootDir": "../../../../../src",
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "importHelpers": true,
         "allowJs": true,
-        "declaration": true,
+        "checkJs": false,
+        "declaration": false,
+        "declarationMap": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "lib": [
             "ESNext"
         ],
         "skipLibCheck": true,
+        "module": "CommonJS",
         "moduleResolution": "Node",
         "sourceMap": true,
         "traceResolution": false,
         "baseUrl": ".",
         "forceConsistentCasingInFileNames": true,
         "jsx": "react",
-        "declarationMap": true,
         "inlineSources": true,
         // "strict": true,
         "strictBindCallApply": true,
-        "strictFunctionTypes": true,
+        // "strictFunctionTypes": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": false,
         "useUnknownInCatchVariables": false,
@@ -39,7 +40,6 @@
             "../../../../../node_modules/@types",
             "../../node_modules/@types"
         ],
-        "module": "commonjs",
         "incremental": true
     },
     "include": [

@@ -5,23 +5,30 @@ import { FileError, type IPackageJson, type ITerminal, JsonFile, Path } from '@r
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as TTypescript from 'typescript';
 import { Worker } from 'worker_threads';
 import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
 
-import type { IScopedLogger } from '@rushstack/heft';
-import type * as TTypescript from 'typescript';
+import type { HeftConfiguration, IScopedLogger } from '@rushstack/heft';
 import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTypings/TypeScriptInternals';
-import type { PerformanceMeasurer } from './Performance';
-import type { IEmitModuleKind, ITypeScriptConfigurationJson } from './plugin-options';
-import type { ICachedEmitModuleKind, ITranspilationRequestMessage, ITranspilationResponseMessage, ITypescriptWorkerData } from './types';
+import type { PerformanceMeasurer, PerformanceMeasurerAsync } from './Performance';
+import type { IRigTypeScriptConfigurationJson, ITypescriptConfig } from './plugin-options';
+import type { ICachedOutputsToBeEmitted, ITranspilationRequestMessage, ITranspilationResponseMessage, ITypescriptWorkerData } from './types';
+import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
+import { IPartialTsconfig } from './TypeScriptPlugin';
 
 
 type RequiredITypeScriptConfigurationJson = {
-    [ K in keyof Required<ITypeScriptConfigurationJson> ]: ITypeScriptConfigurationJson[ K ] | undefined
+    [ K in keyof Required<IRigTypeScriptConfigurationJson> ]: IRigTypeScriptConfigurationJson[ K ] | undefined
 };
 
 
-export interface ITypeScriptBuilderConfiguration extends Omit<RequiredITypeScriptConfigurationJson, 'project' | 'staticAssetsToCopy'> {
+export interface ITypeScriptBuilderConfiguration extends Omit<
+    RequiredITypeScriptConfigurationJson, /* 'project' | */ 'tsconfigs' | 'staticAssetsToCopy' /* | 'emit.inheritanceType' */
+> {
+    rigConfig: HeftConfiguration[ 'rigConfig' ];
+    tsconfigs: ITypescriptConfig[];
+
     /**
      * The root folder of the build.
      */
@@ -42,7 +49,7 @@ export interface ITypeScriptBuilderConfiguration extends Omit<RequiredITypeScrip
     /**
      * The path to the tsconfig file being built.
      */
-    tsconfigPath: string;
+    // tsconfigPath: string;
 
     /**
      * The scoped logger that the builder will log to.
@@ -85,9 +92,9 @@ interface IFileToWrite {
     data: string;
 }
 
-interface IModuleKindReason {
+interface IEmitReason {
     target: TTypescript.ScriptTarget | undefined;
-    kind: TTypescript.ModuleKind;
+    module: TTypescript.ModuleKind;
     outDir: string;
     extension: '.js' | '.cjs' | '.mjs';
     reason: string;
@@ -116,7 +123,7 @@ const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 0;
 interface ITypeScriptTool {
     ts: ExtendedTypeScript;
     measureSync: PerformanceMeasurer;
-
+    measureAsync: PerformanceMeasurerAsync;
     sourceFileCache: Map<string, TTypescript.SourceFile>;
 
     watchProgram: TWatchProgram | undefined;
@@ -137,6 +144,9 @@ interface ITypeScriptTool {
     setTimeout: <T extends unknown[]>(timeout: (...args: T) => void, ms: number, ...args: T) => IPendingWork;
 }
 
+
+
+
 export class TypeScriptBuilder {
     private readonly _configuration: ITypeScriptBuilderConfiguration;
     private readonly _typescriptLogger: IScopedLogger;
@@ -148,7 +158,7 @@ export class TypeScriptBuilder {
     private _capabilities!: ICompilerCapabilities;
     private _useSolutionBuilder!: boolean;
 
-    private _moduleKindsToEmit!: ICachedEmitModuleKind[];
+    private _outputsToBeEmitted!: ICachedOutputsToBeEmitted[];
     private readonly _suppressedDiagnosticCodes: Set<number> = new Set();
 
     private __tsCacheFilePath: string | undefined;
@@ -157,13 +167,21 @@ export class TypeScriptBuilder {
 
     private _nextRequestId: number = 0;
 
-    private get _tsCacheFilePath(): string {
+
+    public constructor(configuration: ITypeScriptBuilderConfiguration) {
+        this._configuration = configuration;
+        this._typescriptLogger = configuration.scopedLogger;
+        this._typescriptTerminal = configuration.scopedLogger.terminal;
+        this.__tsCacheFilePath = this._tsCacheFilePath();
+    }
+
+    private _tsCacheFilePath(): string {
         if (!this.__tsCacheFilePath) {
             // TypeScript internally handles if the tsconfig options have changed from when the tsbuildinfo file was created.
             // We only need to hash our additional Heft configuration.
             const configHash: crypto.Hash = crypto.createHash('sha1');
 
-            configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit || {}));
+            configHash.update(JSON.stringify(this._configuration.tsconfigs));
             const serializedConfigHash: string = configHash
                 .digest('base64')
                 .slice(0, 8)
@@ -182,11 +200,73 @@ export class TypeScriptBuilder {
         return this.__tsCacheFilePath;
     }
 
-    public constructor(configuration: ITypeScriptBuilderConfiguration) {
-        this._configuration = configuration;
-        this._typescriptLogger = configuration.scopedLogger;
-        this._typescriptTerminal = configuration.scopedLogger.terminal;
-    }
+
+
+    private async _loadTsconfig(args: {
+        ts: ExtendedTypeScript;
+        tsconfigPath: string;
+        existingOptions?: TTypescript.CompilerOptions;
+        overrideOptions?: TTypescript.CompilerOptions;
+        tsCacheFilePath?: string;
+    }): Promise<TTypescript.ParsedCommandLine> {
+        const { ts, tsconfigPath, existingOptions, overrideOptions = {}, tsCacheFilePath } = args;
+
+        const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
+            tsconfigPath,
+            ts.sys.readFile
+        );
+
+        const currentFolder: string = path.dirname(tsconfigPath);
+        const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
+            parsedConfigFile.config,
+            {
+                fileExists: ts.sys.fileExists,
+                readFile: ts.sys.readFile,
+                readDirectory: ts.sys.readDirectory,
+                useCaseSensitiveFileNames: true
+            },
+            currentFolder,
+            existingOptions /* : undefined */,
+            tsconfigPath
+        );
+
+        if (tsconfig.options.incremental) {
+            tsconfig.options.tsBuildInfoFile = tsCacheFilePath;
+        }
+
+        // const schemaPath: string = `${__dirname}/schemas/anything.schema.json`;
+
+        // const partialTsConfigJson: IPartialTsconfig = await new ConfigurationFile<IPartialTsconfig>({
+        //     projectRelativeFilePath: tsconfigPath,
+        //     jsonSchemaPath: schemaPath,
+        //     propertyInheritance: {
+        //         compilerOptions: {
+        //             inheritanceType: InheritanceType.merge
+        //         }
+        //     },
+        //     jsonPathMetadata: {
+        //         '$.compilerOptions.outDir': {
+        //             pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
+        //         }
+        //     }
+        // }).loadConfigurationFileForProjectAsync(
+        //     this._typescriptTerminal,
+        //     this._configuration.buildFolderPath,
+        //     this._configuration.rigConfig
+        // );
+
+        // this._typescriptTerminal.writeLine(`__________   ${partialTsConfigJson}   _________________`);
+
+        return {
+            ...tsconfig,
+            options: {
+                ...tsconfig.options,
+                // outDir: partialTsConfigJson.compilerOptions?.outDir,
+                ...overrideOptions
+            }
+        };
+    };
+
 
     public async invokeAsync(onChangeDetected?: () => void): Promise<void> {
         if (!this._tool) {
@@ -269,21 +349,35 @@ export class TypeScriptBuilder {
                 }
             }
 
-            const measureTsPerformance: PerformanceMeasurer = <TResult extends object | void>(
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+            const makeMeasureTsPerformance = <M extends 'sync' | 'async'>(mode: M) => <TResult extends object | void>(
                 measurementName: string,
-                fn: () => TResult
-            ) => {
+                fn: () => TResult | Promise<TResult>
+            ): M extends 'sync' ? TResult & { duration: number; } : Promise<TResult & { duration: number; }> => {
+
                 const beforeName: string = `before${measurementName}`;
                 ts.performance.mark(beforeName);
-                const result: TResult = fn();
-                const afterName: string = `after${measurementName}`;
-                ts.performance.mark(afterName);
-                ts.performance.measure(measurementName, beforeName, afterName);
-                return {
-                    ...result,
-                    duration: ts.performance.getDuration(measurementName),
-                    count: ts.performance.getCount(beforeName)
+
+                const after = (result: TResult): TResult & { duration: number; count: number; } => {
+                    const afterName: string = `after${measurementName}`;
+                    ts.performance.mark(afterName);
+                    ts.performance.measure(measurementName, beforeName, afterName);
+
+                    return {
+                        ...result,
+                        duration: ts.performance.getDuration(measurementName),
+                        count: ts.performance.getCount(beforeName)
+                    };
                 };
+
+                if (mode === 'sync') {
+                    const result: TResult = fn() as TResult;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    return after(result) as any;
+                }
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                return (fn() as Promise<TResult>).then(result => after(result)) as any;
             };
 
             this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
@@ -295,7 +389,8 @@ export class TypeScriptBuilder {
             this._tool = {
                 ts,
 
-                measureSync: measureTsPerformance,
+                measureSync: makeMeasureTsPerformance('sync'),
+                measureAsync: makeMeasureTsPerformance('async'),
 
                 sourceFileCache: new Map(),
 
@@ -351,35 +446,41 @@ export class TypeScriptBuilder {
     public async _runWatchAsync(tool: ITypeScriptTool): Promise<void> {
         const {
             ts,
-            measureSync: measureTsPerformance,
+            measureAsync,
             pendingOperations,
             rawDiagnostics,
             pendingTranspilePromises
         } = tool;
 
+
         if (!tool.solutionBuilder && !tool.watchProgram) {
+            const typescriptConfig: ITypescriptConfig = this._configuration.tsconfigs.find(config => config.isPrimary)!;
+            const { tsconfigPath } = typescriptConfig;
+
             //#region CONFIGURE
-            const { duration: configureDurationMs, tsconfig } = measureTsPerformance('Configure', () => {
-                const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
-                this._validateTsconfig(ts, _tsconfig);
+            const { duration: configureDurationMs, primaryTsConfig } = await measureAsync('Configure', async () => {
+                // eslint-disable-next-line @typescript-eslint/typedef
+                const outputs = await this._initOutputsToBeEmitted(ts);
+                const primaryTsConfig: TTypescript.ParsedCommandLine = outputs.find(o => o.outputToBeEmitted.isPrimary)!.parsedTsconfig;
 
                 return {
-                    tsconfig: _tsconfig
+                    primaryTsConfig
                 };
             });
+
             this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
             //#endregion
 
             if (this._useSolutionBuilder) {
                 const solutionHost: TWatchSolutionHost = this._buildWatchSolutionBuilderHost(tool);
                 const builder: TTypescript.SolutionBuilder<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
-                    ts.createSolutionBuilderWithWatch(solutionHost, [ this._configuration.tsconfigPath ], {});
+                    ts.createSolutionBuilderWithWatch(solutionHost, [ tsconfigPath || 'src' ], {});
 
                 tool.solutionBuilder = builder as IExtendedSolutionBuilder;
 
                 builder.build();
             } else {
-                const compilerHost: TWatchCompilerHost = this._buildWatchCompilerHost(tool, tsconfig);
+                const compilerHost: TWatchCompilerHost = this._buildWatchCompilerHost(tool, primaryTsConfig);
                 tool.watchProgram = ts.createWatchProgram(compilerHost);
             }
         }
@@ -406,24 +507,31 @@ export class TypeScriptBuilder {
     }
 
     public async _runBuildAsync(tool: ITypeScriptTool): Promise<void> {
-        const { ts, measureSync: measureTsPerformance, pendingTranspilePromises } = tool;
+        const { ts, measureAsync, measureSync, pendingTranspilePromises } = tool;
 
         //#region CONFIGURE
         const {
             duration: configureDurationMs,
-            tsconfig,
+            primaryTsConfig,
             compilerHost
-        } = measureTsPerformance('Configure', () => {
-            const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
-            this._validateTsconfig(ts, _tsconfig);
+        } = await measureAsync('Configure', async () => {
 
-            const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(tool, _tsconfig);
+            // eslint-disable-next-line @typescript-eslint/typedef
+            const outputs = await this._initOutputsToBeEmitted(ts);
+            const primaryTsConfig: TTypescript.ParsedCommandLine = outputs.find(o => o.outputToBeEmitted.isPrimary)!.parsedTsconfig;
+
+            const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(
+                tool,
+                primaryTsConfig
+            );
 
             return {
-                tsconfig: _tsconfig,
+                primaryTsConfig,
                 compilerHost: _compilerHost
             };
         });
+
+
         this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
         //#endregion
 
@@ -433,35 +541,36 @@ export class TypeScriptBuilder {
         let innerProgram: TTypescript.Program;
 
         const isolatedModules: boolean =
-            !!this._configuration.useTranspilerWorker && !!tsconfig.options.isolatedModules;
+            !!this._configuration.useTranspilerWorker && !!primaryTsConfig.options.isolatedModules;
         const mode: 'both' | 'declaration' = isolatedModules ? 'declaration' : 'both';
 
         let filesToTranspile: Map<string, string> | undefined;
 
-        if (tsconfig.options.incremental) {
+        if (primaryTsConfig.options.incremental) {
             // Use ts.createEmitAndSemanticDiagnositcsBuilderProgram directly because the customizations performed by
             // _getCreateBuilderProgram duplicate those performed in this function for non-incremental build.
-            const oldProgram: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram | undefined = ts.readBuilderProgram(tsconfig.options, compilerHost);
+            const oldProgram: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram | undefined =
+                ts.readBuilderProgram(primaryTsConfig.options, compilerHost);
 
             builderProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram(
-                tsconfig.fileNames,
-                tsconfig.options,
+                primaryTsConfig.fileNames,
+                primaryTsConfig.options,
                 compilerHost,
                 oldProgram,
-                ts.getConfigFileParsingDiagnostics(tsconfig),
-                tsconfig.projectReferences
+                ts.getConfigFileParsingDiagnostics(primaryTsConfig),
+                primaryTsConfig.projectReferences
             );
 
             filesToTranspile = getFilesToTranspileFromBuilderProgram(builderProgram);
             innerProgram = builderProgram.getProgram();
         } else {
             innerProgram = ts.createProgram({
-                rootNames: tsconfig.fileNames,
-                options: tsconfig.options,
-                projectReferences: tsconfig.projectReferences,
+                rootNames: primaryTsConfig.fileNames,
+                options: primaryTsConfig.options,
+                projectReferences: primaryTsConfig.projectReferences,
                 host: compilerHost,
                 oldProgram: undefined,
-                configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
+                configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(primaryTsConfig)
             });
 
             filesToTranspile = getFilesToTranspileFromProgram(innerProgram);
@@ -479,7 +588,7 @@ export class TypeScriptBuilder {
         }
 
         //#region ANALYSIS
-        const { duration: diagnosticsDurationMs, diagnostics: preDiagnostics } = measureTsPerformance(
+        const { duration: diagnosticsDurationMs, diagnostics: preDiagnostics } = measureSync(
             'Analyze',
             () => {
                 const rawDiagnostics: TTypescript.Diagnostic[] = [
@@ -499,7 +608,7 @@ export class TypeScriptBuilder {
         const { changedFiles } = configureProgramForMultiEmit({
             innerProgram,
             ts,
-            moduleKindsToEmit: this._moduleKindsToEmit,
+            outputsToBeEmitted: this._outputsToBeEmitted,
             mode,
             buildFolderPath: this._configuration.buildFolderPath,
             logger: this._typescriptLogger
@@ -544,29 +653,57 @@ export class TypeScriptBuilder {
     public async _runSolutionBuildAsync(tool: ITypeScriptTool): Promise<void> {
         this._typescriptTerminal.writeVerboseLine(`Using solution mode`);
 
-        const { ts, measureSync, rawDiagnostics, pendingTranspilePromises } = tool;
+        const { ts, measureAsync, rawDiagnostics, pendingTranspilePromises } = tool;
         rawDiagnostics.length = 0;
 
         if (!tool.solutionBuilder) {
             //#region CONFIGURE
-            const { duration: configureDurationMs, solutionBuilderHost } = measureSync('Configure', () => {
-                const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
-                this._validateTsconfig(ts, _tsconfig);
-
+            const {
+                duration: configureDurationMs,
+                solutionBuilderHost
+            } = await measureAsync('Configure', async () => {
+                await this._initOutputsToBeEmitted(ts);
                 const _solutionBuilderHost: TSolutionHost = this._buildSolutionBuilderHost(tool);
 
                 return {
                     solutionBuilderHost: _solutionBuilderHost
                 };
             });
+
+
+            const typescriptConfig: ITypescriptConfig = this._configuration.tsconfigs.find(config => config.isPrimary)!;
+            const { tsconfigPath } = typescriptConfig;
+
+            // const _tsconfig: TTypescript.ParsedCommandLine = tsconfigPath ? _loadTsconfig({
+            //     ts,
+            //     tsconfigPath,
+            //     tsCacheFilePath: this.__tsCacheFilePath,
+            //     overrideOptions: typescriptConfig.tsconfigJson?.compilerOptions,
+            // }) : { options: typescriptConfig.tsconfigJson?.compilerOptions || {}, fileNames: [ 'src' ], errors: [] };
+
+
+            //#region CONFIGURE
+            // const { duration: configureDurationMs, solutionBuilderHost } = measureSync('Configure', () => {
+            //     this._validateTsconfig(ts, _tsconfig, typescriptConfig.jsExtension);
+
+            //     const _solutionBuilderHost: TSolutionHost = this._buildSolutionBuilderHost(tool);
+
+            //     return {
+            //         solutionBuilderHost: _solutionBuilderHost
+            //     };
+            // });
+
             this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
             //#endregion
 
-            tool.solutionBuilder = ts.createSolutionBuilder(
-                solutionBuilderHost,
-                [ this._configuration.tsconfigPath ],
-                {}
-            ) as IExtendedSolutionBuilder;
+            if (!tool.solutionBuilder) {
+                // https://eslint.org/docs/latest/rules/require-atomic-updates
+                tool.solutionBuilder = ts.createSolutionBuilder(
+                    solutionBuilderHost,
+                    [ tsconfigPath || 'src' ],
+                    {}
+                ) as IExtendedSolutionBuilder;
+            }
         } else {
             // Force reload everything from disk
             for (const project of tool.solutionBuilder.getBuildOrder()) {
@@ -732,7 +869,52 @@ export class TypeScriptBuilder {
         return diagnostic.category;
     }
 
-    private _validateTsconfig(ts: ExtendedTypeScript, tsconfig: TTypescript.ParsedCommandLine): void {
+    private _initOutputsToBeEmitted(ts: ExtendedTypeScript): Promise<{
+        parsedTsconfig: TTypescript.ParsedCommandLine;
+        outputToBeEmitted: ICachedOutputsToBeEmitted;
+    }[]> {
+
+        this._outputsToBeEmitted = [];
+
+        /*   const primartTypescriptConfig: ITypescriptConfig = this._configuration.tsconfigs.find(config => config.isPrimary)!;
+  
+          const _tsconfig: TTypescript.ParsedCommandLine = primartTypescriptConfig.tsconfigPath ? _loadTsconfig({
+              ts,
+              tsconfigPath: primartTypescriptConfig.tsconfigPath,
+              tsCacheFilePath: this.__tsCacheFilePath,
+              overrideOptions: primartTypescriptConfig.tsconfigJson?.compilerOptions,
+          }) : { options: primartTypescriptConfig.tsconfigJson?.compilerOptions || {}, fileNames: [ 'src' ], errors: [] };
+   */
+
+        // this._typescriptTerminal.writeLine(`
+        // tsconfigPath: ${tsconfigPath},
+        // tsCacheFilePath: ${this.__tsCacheFilePath},
+        // _tsconfig: ${JSON.stringify(_tsconfig, null, 4)}`);
+
+        return Promise.all(this._configuration.tsconfigs.map(async tsconfig => {
+            const { tsconfigPath } = tsconfig;
+
+            const parsedTsconfig: TTypescript.ParsedCommandLine = /* tsconfigPath ? */await this._loadTsconfig({
+                ts,
+                tsconfigPath,
+                tsCacheFilePath: this.__tsCacheFilePath,
+                overrideOptions: tsconfig.tsconfigJson?.compilerOptions,
+            }) /* : Promise.resolve({ options: tsconfig.tsconfigJson?.compilerOptions || {}, fileNames: [ 'src' ], errors: [] }) */;
+
+            if (this._validateTsconfig(ts, parsedTsconfig, tsconfig)) {
+                return { parsedTsconfig, outputToBeEmitted: this._outputsToBeEmitted.at(-1)! };
+            }
+        }).filter(Boolean)) as Promise<{
+            parsedTsconfig: TTypescript.ParsedCommandLine;
+            outputToBeEmitted: ICachedOutputsToBeEmitted;
+        }[]>;
+    }
+
+    private _validateTsconfig(
+        ts: ExtendedTypeScript,
+        tsconfig: TTypescript.ParsedCommandLine,
+        config: ITypescriptConfig
+    ): boolean {
         if (
             (tsconfig.options.module && !tsconfig.options.outDir) ||
             (!tsconfig.options.module && tsconfig.options.outDir)
@@ -742,210 +924,264 @@ export class TypeScriptBuilder {
             );
         }
 
-        this._moduleKindsToEmit = [];
+        // const specifiedKinds: Map<TTypescript.ModuleKind, Map<TTypescript.ScriptTarget, IEmitReason>> = new Map();
 
-        const specifiedKinds: Map<TTypescript.ModuleKind, Map<TTypescript.ScriptTarget, IModuleKindReason>> = new Map();
+        // const addToSpecifiedKinds = (
+        //     moduleKind: TTypescript.ModuleKind, target: TTypescript.ScriptTarget, reason: IEmitReason
+        // ): void => {
+        //     const moduleKindMap: Map<TTypescript.ScriptTarget, IEmitReason> = specifiedKinds.get(moduleKind) || new Map();
+        //     moduleKindMap.set(target, reason);
 
-        const addToSpecifiedKinds = (moduleKind: TTypescript.ModuleKind, target: TTypescript.ScriptTarget, reason: IModuleKindReason): void => {
-            const moduleKindMap: Map<TTypescript.ScriptTarget, IModuleKindReason> = specifiedKinds.get(moduleKind) || new Map();
-            moduleKindMap.set(target, reason);
+        //     specifiedKinds.set(moduleKind, moduleKindMap);
+        // };
 
-            specifiedKinds.set(moduleKind, moduleKindMap);
-        };
-
-        const specifiedOutDirs: Map<string, IModuleKindReason> = new Map();
+        // const specifiedOutDirs: Map<string, IEmitReason> = new Map();
+        const outDirs: Map<string, IEmitReason> = new Map();
 
         if (!tsconfig.options.module) {
             throw new Error(
                 'If the module tsconfig compilerOption is not provided, the builder must be provided with the ' +
-                'additionalModuleKindsToEmit configuration option.'
+                'additionalModuleKindsToEmit configuration option. \n' + JSON.stringify(tsconfig)
             );
         }
 
-        const isConfigPrimary = (moduleKind: TTypescript.ModuleKind, target: TTypescript.ScriptTarget): boolean => {
-            return tsconfig.options.module === moduleKind && tsconfig.options.target === target;
-        };
+        // const isConfigPrimary = (moduleKind: TTypescript.ModuleKind, target: TTypescript.ScriptTarget): boolean => {
+        //     return tsconfig.options.module === moduleKind && tsconfig.options.target === target;
+        // };
 
 
-        if (this._configuration.emitCjsExtensionForCommonJS) {
-            const isPrimary: boolean = isConfigPrimary(ts.ModuleKind.CommonJS, ts.ScriptTarget.ES2015);
+        // if (this._configuration.emitCjsExtensionForCommonJS) {
+        //     const isPrimary: boolean = isConfigPrimary(ts.ModuleKind.CommonJS, ts.ScriptTarget.ES2015);
 
-            const target: TTypescript.ScriptTarget = isPrimary && tsconfig.options.target ?
-                tsconfig.options.target <= ts.ScriptTarget.ES2015 ? tsconfig.options.target : ts.ScriptTarget.ES2015 :
-                ts.ScriptTarget.ES2015;
+        //     const target: TTypescript.ScriptTarget = isPrimary && tsconfig.options.target ?
+        //         tsconfig.options.target <= ts.ScriptTarget.ES2015 ? tsconfig.options.target : ts.ScriptTarget.ES2015 :
+        //         ts.ScriptTarget.ES2015;
 
-            const moduleKind: TTypescript.ModuleKind = ts.ModuleKind.CommonJS;
+        //     const moduleKind: TTypescript.ModuleKind = ts.ModuleKind.CommonJS;
 
-            this._addModuleKindToEmit({
-                moduleKind,
-                target,
-                outFolderPath: tsconfig.options.outDir!,
-                isPrimary,
-                jsExtensionOverride: '.cjs'
-            });
+        //     this._addModuleKindToEmit({
+        //         moduleKind,
+        //         target,
+        //         outFolderPath: tsconfig.options.outDir!,
+        //         isPrimary,
+        //         jsExtensionOverride: '.cjs'
+        //     });
 
-            const cjsReason: IModuleKindReason = {
-                outDir: tsconfig.options.outDir!,
-                kind: moduleKind,
-                target,
-                extension: '.cjs',
-                reason: 'emitCjsExtensionForCommonJS'
+        //     const cjsReason: IModuleKindReason = {
+        //         outDir: tsconfig.options.outDir!,
+        //         kind: moduleKind,
+        //         target,
+        //         extension: '.cjs',
+        //         reason: 'emitCjsExtensionForCommonJS'
+        //     };
+
+        //     addToSpecifiedKinds(moduleKind, target, cjsReason);
+        //     specifiedOutDirs.set(`${tsconfig.options.outDir!}:.cjs`, cjsReason);
+        // }
+
+        // if (this._configuration.emitMjsExtensionForESModule) {
+        //     const isPrimary: boolean = isConfigPrimary(ts.ModuleKind.ESNext, ts.ScriptTarget.ESNext);
+
+        //     const target: TTypescript.ScriptTarget = isPrimary && tsconfig.options.target ?
+        //         tsconfig.options.target >= ts.ScriptTarget.ES2015 ? tsconfig.options.target : ts.ScriptTarget.ESNext :
+        //         ts.ScriptTarget.ESNext;
+
+        //     const moduleKind: TTypescript.ModuleKind = ts.ModuleKind.ESNext;
+
+
+        //     this._addModuleKindToEmit({
+        //         moduleKind,
+        //         target,
+        //         outFolderPath: tsconfig.options.outDir!,
+        //         isPrimary,
+        //         jsExtensionOverride: '.mjs'
+        //     });
+
+        //     const mjsReason: IModuleKindReason = {
+        //         outDir: tsconfig.options.outDir!,
+        //         kind: moduleKind,
+        //         target,
+        //         extension: '.mjs',
+        //         reason: 'emitMjsExtensionForESModule'
+        //     };
+
+        //     addToSpecifiedKinds(moduleKind, target, mjsReason);
+        //     specifiedOutDirs.set(`${tsconfig.options.outDir!}:.mjs`, mjsReason);
+        // }
+
+
+        // if (!specifiedKinds.get(tsconfig.options.module)?.has(tsconfig.options.target!) && this._configuration.emitTsconfigAsBase) {
+
+        //     const target: TTypescript.ScriptTarget = tsconfig.options.target || ts.ScriptTarget.ES3;
+        //     const moduleKind: TTypescript.ModuleKind = tsconfig.options.module;
+
+        //     this._addModuleKindToEmit({
+        //         moduleKind,
+        //         target,
+        //         outFolderPath: tsconfig.options.outDir!,
+        //         isPrimary: true,
+        //         jsExtensionOverride: undefined
+        //     });
+
+        //     const tsConfigReason: IModuleKindReason = {
+        //         outDir: tsconfig.options.outDir!,
+        //         kind: moduleKind,
+        //         target,
+        //         extension: '.js',
+        //         reason: 'tsconfig.json'
+        //     };
+
+        //     addToSpecifiedKinds(moduleKind, target, tsConfigReason);
+        //     specifiedOutDirs.set(`${tsconfig.options.outDir!}:.js`, tsConfigReason);
+        // }
+
+        // if (this._configuration.emit) {
+        //     for (const additionalModuleKindToEmit of this._configuration.emit) {
+        //         const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(
+        //             ts,
+        //             additionalModuleKindToEmit.moduleKind
+        //         );
+
+        //         const target: TTypescript.ScriptTarget = this._parseScriptTarget(
+        //             ts,
+        //             additionalModuleKindToEmit.target
+        //         ) || tsconfig.options.target!;
+
+        //         const outDirKey: string = `${additionalModuleKindToEmit.outFolderName}:.js`;
+
+        //         const moduleKindReason: IModuleKindReason = {
+        //             kind: moduleKind,
+        //             target,
+        //             outDir: additionalModuleKindToEmit.outFolderName,
+        //             extension: `.${additionalModuleKindToEmit.jsExtension || 'js'}`,
+        //             reason: `additionalModuleKindsToEmit`
+        //         };
+
+        //         const existingKind: IModuleKindReason | undefined = specifiedKinds.get(moduleKind)?.get(target);
+        //         const existingDir: IModuleKindReason | undefined = specifiedOutDirs.get(outDirKey);
+
+        //         if (existingKind) {
+        //             throw new Error(
+        //                 `Module kind "${additionalModuleKindToEmit.moduleKind}" with target "${additionalModuleKindToEmit.target}" is already ` +
+        //                 `emitted at ${existingKind.outDir} with extension '${existingKind.extension}' by option ${existingKind.reason}.`
+        //             );
+        //         } else if (existingDir) {
+        //             throw new Error(
+        //                 `Output folder "${additionalModuleKindToEmit.outFolderName}" already contains module kind ${existingDir.kind} ` +
+        //                 `with target "${additionalModuleKindToEmit.target}" and with extension '${existingDir.extension}', ` +
+        //                 `specified by option ${existingDir.reason}.`
+        //             );
+        //         } else {
+        //             const outFolderKey: string | undefined = this._addModuleKindToEmit({
+        //                 moduleKind,
+        //                 target,
+        //                 outFolderPath: additionalModuleKindToEmit.outFolderName,
+        //                 isPrimary: false,
+        //                 jsExtensionOverride: moduleKindReason.extension
+        //             });
+
+        //             if (outFolderKey) {
+        //                 addToSpecifiedKinds(moduleKind, target, moduleKindReason);
+        //                 specifiedOutDirs.set(outFolderKey, moduleKindReason);
+        //             }
+        //         }
+        //     }
+        // }
+
+
+
+
+        const { outDir = 'dist' } = tsconfig.options;
+        const jsExtension: IEmitReason[ 'extension' ] = `.${config.jsExtension || 'js'}`;
+
+
+        const existingDir: IEmitReason | undefined = outDirs.get(this._outDirKey(outDir, jsExtension));
+
+        if (existingDir) {
+            throw new Error(
+                `Output folder "${outDir}" has already been set to be emitted for the following reason: "${existingDir.reason}"`
+            );
+        } else {
+
+            const emitReason: IEmitReason = {
+                module: tsconfig.options.module,
+                target: tsconfig.options.target,
+                outDir,
+                extension: jsExtension,
+                reason: 'tsconfigPath' // `additionalModuleKindsToEmit`
             };
 
-            addToSpecifiedKinds(moduleKind, target, cjsReason);
-            specifiedOutDirs.set(`${tsconfig.options.outDir!}:.cjs`, cjsReason);
-        }
-
-        if (this._configuration.emitMjsExtensionForESModule) {
-            const isPrimary: boolean = isConfigPrimary(ts.ModuleKind.ESNext, ts.ScriptTarget.ESNext);
-
-            const target: TTypescript.ScriptTarget = isPrimary && tsconfig.options.target ?
-                tsconfig.options.target >= ts.ScriptTarget.ES2015 ? tsconfig.options.target : ts.ScriptTarget.ESNext :
-                ts.ScriptTarget.ESNext;
-
-            const moduleKind: TTypescript.ModuleKind = ts.ModuleKind.ESNext;
-
-
-            this._addModuleKindToEmit({
-                moduleKind,
-                target,
-                outFolderPath: tsconfig.options.outDir!,
-                isPrimary,
-                jsExtensionOverride: '.mjs'
-            });
-
-            const mjsReason: IModuleKindReason = {
-                outDir: tsconfig.options.outDir!,
-                kind: moduleKind,
-                target,
-                extension: '.mjs',
-                reason: 'emitMjsExtensionForESModule'
+            const addToEmitArgs: Parameters<TypeScriptBuilder[ '_addToEmit' ]>[ 0 ] = {
+                // module: tsconfig.options.module,
+                // target: tsconfig.options.target || ts.ScriptTarget.ES2015,
+                // outDir,
+                typescriptOptions: tsconfig.options,
+                isPrimary: config.isPrimary || false,
+                jsExtensionOverride: emitReason.extension
             };
 
-            addToSpecifiedKinds(moduleKind, target, mjsReason);
-            specifiedOutDirs.set(`${tsconfig.options.outDir!}:.mjs`, mjsReason);
-        }
 
-        if (!specifiedKinds.get(tsconfig.options.module)?.has(tsconfig.options.target!) && !this._configuration.useTsconfigAsBase) {
-
-            const target: TTypescript.ScriptTarget = tsconfig.options.target || ts.ScriptTarget.ES3;
-            const moduleKind: TTypescript.ModuleKind = tsconfig.options.module;
-
-            this._addModuleKindToEmit({
-                moduleKind,
-                target,
-                outFolderPath: tsconfig.options.outDir!,
-                isPrimary: true,
-                jsExtensionOverride: undefined
-            });
-
-            const tsConfigReason: IModuleKindReason = {
-                outDir: tsconfig.options.outDir!,
-                kind: moduleKind,
-                target,
-                extension: '.js',
-                reason: 'tsconfig.json'
-            };
-
-            addToSpecifiedKinds(moduleKind, target, tsConfigReason);
-            specifiedOutDirs.set(`${tsconfig.options.outDir!}:.js`, tsConfigReason);
-        }
-
-        if (this._configuration.additionalModuleKindsToEmit) {
-            for (const additionalModuleKindToEmit of this._configuration.additionalModuleKindsToEmit) {
-                const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(
-                    ts,
-                    additionalModuleKindToEmit.moduleKind
-                );
-
-                const target: TTypescript.ScriptTarget = this._parseScriptTarget(
-                    ts,
-                    additionalModuleKindToEmit.target
-                ) || tsconfig.options.target!;
-
-                const outDirKey: string = `${additionalModuleKindToEmit.outFolderName}:.js`;
-
-                const moduleKindReason: IModuleKindReason = {
-                    kind: moduleKind,
-                    target,
-                    outDir: additionalModuleKindToEmit.outFolderName,
-                    extension: `.${additionalModuleKindToEmit.jsExtension || 'js'}`,
-                    reason: `additionalModuleKindsToEmit`
-                };
-
-                const existingKind: IModuleKindReason | undefined = specifiedKinds.get(moduleKind)?.get(target);
-                const existingDir: IModuleKindReason | undefined = specifiedOutDirs.get(outDirKey);
-
-                if (existingKind) {
-                    throw new Error(
-                        `Module kind "${additionalModuleKindToEmit.moduleKind}" with target "${additionalModuleKindToEmit.target}" is already ` +
-                        `emitted at ${existingKind.outDir} with extension '${existingKind.extension}' by option ${existingKind.reason}.`
-                    );
-                } else if (existingDir) {
-                    throw new Error(
-                        `Output folder "${additionalModuleKindToEmit.outFolderName}" already contains module kind ${existingDir.kind} ` +
-                        `with target "${additionalModuleKindToEmit.target}" and with extension '${existingDir.extension}', ` +
-                        `specified by option ${existingDir.reason}.`
-                    );
-                } else {
-                    const outFolderKey: string | undefined = this._addModuleKindToEmit({
-                        moduleKind,
-                        target,
-                        outFolderPath: additionalModuleKindToEmit.outFolderName,
-                        isPrimary: false,
-                        jsExtensionOverride: moduleKindReason.extension
-                    });
-
-                    if (outFolderKey) {
-                        addToSpecifiedKinds(moduleKind, target, moduleKindReason);
-                        specifiedOutDirs.set(outFolderKey, moduleKindReason);
-                    }
-                }
+            if (this._addToEmit(addToEmitArgs)) {
+                outDirs.set(outDir, emitReason);
+                return true;
             }
         }
+
+        return false;
     }
 
-    private _addModuleKindToEmit(args: {
-        moduleKind: TTypescript.ModuleKind,
-        target: TTypescript.ScriptTarget,
-        outFolderPath: string,
+    private _outDirKey(outDir: string, jsExtensionOverride: IEmitReason[ 'extension' ]): string {
+        return `${outDir}:${jsExtensionOverride}`;
+
+    }
+    private _addToEmit(args: {
+        // module: TTypescript.ModuleKind,
+        // target: TTypescript.ScriptTarget,
+        // outDir: string,
+        typescriptOptions: TTypescript.CompilerOptions;
         isPrimary: boolean,
-        jsExtensionOverride: string | undefined;
+        jsExtensionOverride: IEmitReason[ 'extension' ];
     }): string | undefined {
 
-        const { moduleKind, target, isPrimary, jsExtensionOverride } = args;
-        let { outFolderPath } = args;
+        const { /* module, target,  */typescriptOptions, isPrimary, jsExtensionOverride } = args;
+        // const { module, target } = typescriptOptions;
+        let { outDir = '' } = typescriptOptions;
+
 
         let outFolderName: string;
-        if (path.isAbsolute(outFolderPath)) {
-            outFolderName = path.relative(this._configuration.buildFolderPath, outFolderPath);
+
+        if (path.isAbsolute(outDir)) {
+            outFolderName = path.relative(this._configuration.buildFolderPath, outDir);
         } else {
-            outFolderName = outFolderPath;
-            outFolderPath = path.resolve(this._configuration.buildFolderPath, outFolderPath);
+            outFolderName = outDir;
+            outDir = path.resolve(this._configuration.buildFolderPath, outDir);
         }
 
-        outFolderPath = Path.convertToSlashes(outFolderPath);
-        outFolderPath = outFolderPath.replace(/\/*$/, '/'); // Ensure the outFolderPath ends with a slash
+        outFolderName = Path.convertToSlashes(outFolderName);
+        outFolderName = outFolderName.replace(/\/*$/, '/'); // Ensure the outFolderPath ends with a slash
 
-        for (const existingModuleKindToEmit of this._moduleKindsToEmit) {
+        for (const toBeEmitted of this._outputsToBeEmitted) {
             let errorText: string | undefined;
 
-            if (existingModuleKindToEmit.outFolderPath === outFolderPath) {
-                if (existingModuleKindToEmit.jsExtensionOverride === jsExtensionOverride) {
+            if (toBeEmitted.typescriptResolvedOptions.outDir === outFolderName) {
+                if (toBeEmitted.jsExtensionOverride === jsExtensionOverride) {
                     errorText =
                         'Unable to output two different module kinds with the same ' +
                         `module extension (${jsExtensionOverride || '.js'}) to the same ` +
-                        `folder ("${outFolderPath}").`;
+                        `folder ("${outFolderName}").`;
                 }
             } else {
+                const { outDir: toBeEmittedOutDir = '' } = toBeEmitted.typescriptResolvedOptions;
+
                 let parentFolder: string | undefined;
                 let childFolder: string | undefined;
-                if (outFolderPath.startsWith(existingModuleKindToEmit.outFolderPath)) {
-                    parentFolder = outFolderPath;
-                    childFolder = existingModuleKindToEmit.outFolderPath;
-                } else if (existingModuleKindToEmit.outFolderPath.startsWith(outFolderPath)) {
-                    parentFolder = existingModuleKindToEmit.outFolderPath;
-                    childFolder = outFolderPath;
+
+                if (outFolderName.startsWith(toBeEmittedOutDir)) {
+                    parentFolder = outFolderName;
+                    childFolder = toBeEmittedOutDir;
+                } else if (toBeEmittedOutDir.startsWith(outFolderName)) {
+                    parentFolder = toBeEmittedOutDir;
+                    childFolder = outFolderName;
                 }
 
                 if (parentFolder) {
@@ -961,43 +1197,47 @@ export class TypeScriptBuilder {
             }
         }
 
-        this._moduleKindsToEmit.push({
-            outFolderPath,
-            moduleKind,
-            target,
+        this._outputsToBeEmitted.push({
+            /* outDir: outFolderName,
+            module: module,
+            target, */
+            typescriptResolvedOptions: {
+                ...typescriptOptions,
+                outDir: outFolderName,
+            },
             jsExtensionOverride,
             isPrimary
         });
 
-        return `${outFolderName}:${jsExtensionOverride || '.js'}`;
+        return this._outDirKey(outDir, jsExtensionOverride);
     }
 
-    private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {
-        const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
-            this._configuration.tsconfigPath,
-            ts.sys.readFile
-        );
+    // private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {
+    //     const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
+    //         this._configuration.tsconfigPath,
+    //         ts.sys.readFile
+    //     );
 
-        const currentFolder: string = path.dirname(this._configuration.tsconfigPath);
-        const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
-            parsedConfigFile.config,
-            {
-                fileExists: ts.sys.fileExists,
-                readFile: ts.sys.readFile,
-                readDirectory: ts.sys.readDirectory,
-                useCaseSensitiveFileNames: true
-            },
-            currentFolder,
-      /*existingOptions:*/ undefined,
-            this._configuration.tsconfigPath
-        );
+    //     const currentFolder: string = path.dirname(this._configuration.tsconfigPath);
+    //     const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
+    //         parsedConfigFile.config,
+    //         {
+    //             fileExists: ts.sys.fileExists,
+    //             readFile: ts.sys.readFile,
+    //             readDirectory: ts.sys.readDirectory,
+    //             useCaseSensitiveFileNames: true
+    //         },
+    //         currentFolder,
+    //   /*existingOptions:*/ undefined,
+    //         this._configuration.tsconfigPath
+    //     );
 
-        if (tsconfig.options.incremental) {
-            tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
-        }
+    //     if (tsconfig.options.incremental) {
+    //         tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
+    //     }
 
-        return tsconfig;
-    }
+    //     return tsconfig;
+    // }
 
     private _getCreateBuilderProgram(
         ts: ExtendedTypeScript
@@ -1060,7 +1300,7 @@ export class TypeScriptBuilder {
                     const { changedFiles } = configureProgramForMultiEmit({
                         innerProgram,
                         ts,
-                        moduleKindsToEmit: this._moduleKindsToEmit,
+                        outputsToBeEmitted: this._outputsToBeEmitted,
                         mode,
                         buildFolderPath: this._configuration.buildFolderPath,
                         logger: this._typescriptLogger
@@ -1238,88 +1478,88 @@ export class TypeScriptBuilder {
         return host;
     }
 
-    private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: IEmitModuleKind[ 'moduleKind' ]): TTypescript.ModuleKind {
-        switch (moduleKindName.toLowerCase() as Lowercase<IEmitModuleKind[ 'moduleKind' ]>) {
-            case 'commonjs':
-                return ts.ModuleKind.CommonJS;
+    // private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: ModuleKind): TTypescript.ModuleKind {
+    //     switch (moduleKindName.toLowerCase() as Lowercase<ModuleKind>) {
+    //         case 'commonjs':
+    //             return ts.ModuleKind.CommonJS;
 
-            case 'amd':
-                return ts.ModuleKind.AMD;
+    //         case 'amd':
+    //             return ts.ModuleKind.AMD;
 
-            case 'umd':
-                return ts.ModuleKind.UMD;
+    //         case 'umd':
+    //             return ts.ModuleKind.UMD;
 
-            case 'system':
-                return ts.ModuleKind.System;
+    //         case 'system':
+    //             return ts.ModuleKind.System;
 
-            case 'es2015':
-                return ts.ModuleKind.ES2015;
+    //         case 'es2015':
+    //             return ts.ModuleKind.ES2015;
 
-            case 'es2020':
-                return ts.ModuleKind.ES2020;
+    //         case 'es2020':
+    //             return ts.ModuleKind.ES2020;
 
-            case 'es2022':
-                return ts.ModuleKind.ESNext;
+    //         case 'es2022':
+    //             return ts.ModuleKind.ESNext;
 
-            case 'esnext':
-                return ts.ModuleKind.ESNext;
+    //         case 'esnext':
+    //             return ts.ModuleKind.ESNext;
 
-            case 'node16':
-                return ts.ModuleKind.Node16;
+    //         case 'node16':
+    //             return ts.ModuleKind.Node16;
 
-            case 'nodenext':
-                return ts.ModuleKind.NodeNext;
+    //         case 'nodenext':
+    //             return ts.ModuleKind.NodeNext;
 
-            default:
-                throw new Error(`"${moduleKindName}" is not a valid module kind name.`);
-        }
-    }
+    //         default:
+    //             throw new Error(`"${moduleKindName}" is not a valid module kind name.`);
+    //     }
+    // }
 
-    private _parseScriptTarget(ts: ExtendedTypeScript, target: IEmitModuleKind[ 'target' ]): TTypescript.ScriptTarget | undefined {
-        if (!target)
-            return undefined;
+    // private _parseScriptTarget(ts: ExtendedTypeScript, target: IEmit[ 'target' ]): TTypescript.ScriptTarget | undefined {
+    //     if (!target)
+    //         return undefined;
 
-        switch (target.toLowerCase() as Lowercase<Exclude<IEmitModuleKind[ 'target' ], undefined>>) {
-            case 'es3':
-                return ts.ScriptTarget.ES3;
+    //     switch (target.toLowerCase() as Lowercase<Exclude<IEmit[ 'target' ], undefined>>) {
+    //         case 'es3':
+    //             return ts.ScriptTarget.ES3;
 
-            case 'es5':
-                return ts.ScriptTarget.ES5;
+    //         case 'es5':
+    //             return ts.ScriptTarget.ES5;
 
-            case 'es2015':
-                return ts.ScriptTarget.ES2015;
+    //         case 'es2015':
+    //             return ts.ScriptTarget.ES2015;
 
-            case 'es2016':
-                return ts.ScriptTarget.ES2016;
+    //         case 'es2016':
+    //             return ts.ScriptTarget.ES2016;
 
-            case 'es2017':
-                return ts.ScriptTarget.ES2017;
+    //         case 'es2017':
+    //             return ts.ScriptTarget.ES2017;
 
-            case 'es2018':
-                return ts.ScriptTarget.ES2018;
+    //         case 'es2018':
+    //             return ts.ScriptTarget.ES2018;
 
-            case 'es2019':
-                return ts.ScriptTarget.ES2019;
+    //         case 'es2019':
+    //             return ts.ScriptTarget.ES2019;
 
-            case 'es2020':
-                return ts.ScriptTarget.ES2020;
+    //         case 'es2020':
+    //             return ts.ScriptTarget.ES2020;
 
-            case 'es2021':
-                return ts.ScriptTarget.ES2021;
+    //         case 'es2021':
+    //             return ts.ScriptTarget.ES2021;
 
-            case 'es2022':
-                return ts.ScriptTarget.ESNext;
+    //         case 'es2022':
+    //             return ts.ScriptTarget.ESNext;
 
-            case 'esnext':
-                return ts.ScriptTarget.ESNext;
+    //         case 'esnext':
+    //             return ts.ScriptTarget.ESNext;
 
-            case 'latest':
-                return ts.ScriptTarget.Latest;
+    //         case 'latest':
+    //             return ts.ScriptTarget.Latest;
 
-            default:
-                throw new Error(`"${target}" is not a valid target name.`);
-        }
-    }
+    //         default:
+    //             throw new Error(`"${target}" is not a valid target name.`);
+    //     }
+    // }
 
     private _queueTranspileInWorker(
         tool: ITypeScriptTool,
@@ -1391,7 +1631,7 @@ export class TypeScriptBuilder {
                 const request: ITranspilationRequestMessage = {
                     compilerOptions,
                     filesToTranspile,
-                    moduleKindsToEmit: this._moduleKindsToEmit,
+                    outputsToBeEmitted: this._outputsToBeEmitted,
                     requestId
                 };
 

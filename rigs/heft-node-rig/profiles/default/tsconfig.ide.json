@@ -2,8 +2,17 @@
     // For IDE
     "extends": "./tsconfig.base.json",
     "compilerOptions": {
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
+        "outDir": "../../../../../lib-esnext",
+        // In addition to the base functionality of ES2015/ES6, ES2020 adds support for dynamic imports,
+        // and import.meta while ES2022 further adds support for top level await.
+        // Available from 4.7+, the node16 and nodenext modes integrate with Node’s native ECMAScript Module support.
+        // https://www.typescriptlang.org/docs/handbook/modules.html
+        "module": "ESNext",
+        // https://www.typescriptlang.org/docs/handbook/esm-node.html
+        // Node=Node10
+        // 'node16' or 'nodenext' for modern versions of Node.js.
+        //  Node.js v12 and later supports both ECMAScript imports and CommonJS require, which resolve using different algorithms. 
+        "moduleResolution": "Node",
         "target": "ESNext"
     },
     "exclude": [

@@ -38,7 +38,7 @@ function handleMessage(message: ITranspilationRequestMessage | false): void {
 }
 
 function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuccessMessage {
-    const { requestId, compilerOptions, moduleKindsToEmit, filesToTranspile } = message;
+    const { requestId, compilerOptions, outputsToBeEmitted: moduleKindsToEmit, filesToTranspile } = message;
 
     const fullySkipTypeCheck: boolean =
     /* TypeScript 5+ */ compilerOptions.verbatimModuleSyntax ||
@@ -98,7 +98,7 @@ function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuc
     configureProgramForMultiEmit({
         innerProgram: program,
         ts,
-        moduleKindsToEmit,
+        outputsToBeEmitted: moduleKindsToEmit,
         mode: 'transpile',
         buildFolderPath: '',
     });

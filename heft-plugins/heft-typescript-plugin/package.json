@@ -19,7 +19,7 @@
         "_phase:test": "heft run --only test -- --clean"
     },
     "peerDependencies": {
-        "@rushstack/heft": "0.58.2"
+        "@rushstack/heft": "0.61.0"
     },
     "dependencies": {
         "@rushstack/node-core-library": "3.60.0",
@@ -29,9 +29,9 @@
     },
     "devDependencies": {
         "@rushstack/eslint-config": "3.3.4",
-        "@rushstack/heft": "0.59.0",
-        "@rushstack/heft-node-rig": "2.2.23",
-        "@types/node": "20.6.1",
+        "@rushstack/heft-node-rig": "2.2.25",
+        "@rushstack/heft": "0.61.0",
+        "@types/node": "20.6.3",
         "@types/semver": "7.5.2",
         "@types/tapable": "2.2.5",
         "typescript": "~5.2.2"

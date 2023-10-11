@@ -1,0 +1,85 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "TypeScript Build Configuration",
+    "description": "Defines optional options for TypeScript build.",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+            "type": "string"
+        },
+        "extends": {
+            "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+            "type": "string"
+        },
+        "tsconfigs": {
+            "type": "array",
+            "description": "If provided, emit those configs.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "isPrimary": {
+                        "type": "boolean"
+                    },
+                    "tsconfigPath": {
+                        "type": "string"
+                    },
+                    "compilerOptions": {
+                        "$ref": "https://json.schemastore.org/tsconfig#/definitions/compilerOptionsDefinition"
+                    },
+                    "jsExtension": {
+                        "type": "string",
+                        "enum": [
+                            "js",
+                            "mjs",
+                            "cjs"
+                        ]
+                    }
+                }
+            }
+        },
+        "buildProjectReferences": {
+            "description": "If true, enable behavior analogous to the \"tsc --build\" command. Will build projects referenced by the main project. Note that this will effectively enable \"noEmitOnError\".",
+            "type": "boolean"
+        },
+        "useTranspilerWorker": {
+            "description": "If true, and the tsconfig has \"isolatedModules\": true, then transpilation will happen in parallel in a worker thread.",
+            "type": "boolean"
+        },
+        "staticAssetsToCopy": {
+            "description": "Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example so that these files can be resolved by import statements.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "fileExtensions": {
+                    "type": "array",
+                    "description": "File extensions that should be copied from the source folder to the destination folder(s)",
+                    "items": {
+                        "type": "string",
+                        "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+                    }
+                },
+                "excludeGlobs": {
+                    "type": "array",
+                    "description": "Globs that should be explicitly excluded. This takes precedence over globs listed in \"includeGlobs\" and files that match the file extensions provided in \"fileExtensions\".",
+                    "items": {
+                        "type": "string",
+                        "pattern": "[^\\\\]"
+                    }
+                },
+                "includeGlobs": {
+                    "type": "array",
+                    "description": "Globs that should be explicitly included.",
+                    "items": {
+                        "type": "string",
+                        "pattern": "[^\\\\]"
+                    }
+                }
+            }
+        }
+    },
+    "required": [
+        "tsconfigs"
+    ]
+}

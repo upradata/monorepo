@@ -21,7 +21,7 @@ export interface ITranspilationRequestMessage {
     /**
      * The variants to emit.
      */
-    moduleKindsToEmit: ICachedEmitModuleKind[];
+    outputsToBeEmitted: ICachedOutputsToBeEmitted[];
     /**
      * The set of files to build.
      */
@@ -45,11 +45,12 @@ export interface ITranspilationErrorMessage {
 
 export type ITranspilationResponseMessage = ITranspilationSuccessMessage | ITranspilationErrorMessage;
 
-export interface ICachedEmitModuleKind {
-    moduleKind: TTypescript.ModuleKind;
-    target: TTypescript.ScriptTarget | undefined;
+export interface ICachedOutputsToBeEmitted {
+    // module: TTypescript.ModuleKind;
+    // target: TTypescript.ScriptTarget | undefined;
 
-    outFolderPath: string;
+    // outDir: string;
+    typescriptResolvedOptions: TTypescript.CompilerOptions;
 
     /**
      * File extension to use instead of '.js' for emitted ECMAScript files.

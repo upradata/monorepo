@@ -1,16 +1,38 @@
 import type * as TTypescript from 'typescript';
 
 
+export type ModuleKind = Exclude<keyof typeof TTypescript.ModuleKind, 'None'>;
+
 /**
  * @beta
  */
-export interface IEmitModuleKind {
-    moduleKind: Exclude<keyof typeof TTypescript.ModuleKind, 'None'>; // 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
-    target?: keyof typeof TTypescript.ScriptTarget;
+export interface ITypescriptConfig {
+    // moduleKind?: ModuleKind; // 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
+    // target?: keyof typeof TTypescript.ScriptTarget;
+    // tsconfigPath?: string;
+    // jsExtension?: 'js' | 'cjs' | 'mjs';
+    // isPrimary?: boolean;
+    // outFolderName: string;
+    // jsExtensionOverride?: string;
+
+
+    tsconfigPath: string;
     jsExtension?: 'js' | 'cjs' | 'mjs';
-    outFolderName: string;
-    jsExtensionOverride?: string;
+    isPrimary?: boolean;
+    tsconfigJson?: ITsConfigJson;
 }
+
+
+export interface ITsConfigJson {
+    compilerOptions?: TTypescript.CompilerOptions;
+    // include?: string[];
+    // exclude?: string[];
+    // references?: TTypescript.ProjectReference[];
+    // extends?: string;
+    // files?: string[];
+    // compileOnSave?: boolean;
+}
+
 
 /**
  * @beta
@@ -24,22 +46,23 @@ export interface IStaticAssetsCopyConfiguration {
 /**
  * @beta
  */
-export interface ITypeScriptConfigurationJson {
+export interface IRigTypeScriptConfigurationJson {
     /**
      * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
      * Note that this option only applies to the main tsconfig.json configuration.
      */
-    additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+    tsconfigs: ITypescriptConfig[];
+    // 'emit.inheritanceType'?: Exclude<keyof typeof InheritanceType, 'custom'> | undefined;
 
     /**
      * If 'true', emit CommonJS output into the TSConfig outDir with the file extension '.cjs'
      */
-    emitCjsExtensionForCommonJS?: boolean | undefined;
+    // emitCjsExtensionForCommonJS?: boolean | undefined;
 
     /**
      * If 'true', emit ESModule output into the TSConfig outDir with the file extension '.mjs'
      */
-    emitMjsExtensionForESModule?: boolean | undefined;
+    // emitMjsExtensionForESModule?: boolean | undefined;
 
     /**
      * If true, enable behavior analogous to the "tsc --build" command. Will build projects referenced by the main project in dependency order.
@@ -57,13 +80,13 @@ export interface ITypeScriptConfigurationJson {
      *
      * The default value is "./tsconfig.json"
      */
-    project?: string;
+    // tsconfigBase?: string;
 
     /**
      * Specifies if the the tsconfig.json is used as a base or an entire config for a compilation.
      * To use in conjunction with the "additionalModuleKindsToEmit" option.
      */
-    useTsconfigAsBase?: boolean;
+    // emitTsconfigAsBase?: boolean;
 
     /**
      * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example

@@ -6,7 +6,7 @@ import path from 'node:path';
 // See LICENSE in the project root for license information.
 import type * as TTypescript from 'typescript';
 import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';
-import type { ICachedEmitModuleKind } from './types';
+import type { ICachedOutputsToBeEmitted } from './types';
 
 
 // symbols for attaching hidden metadata to ts.Program instances.
@@ -47,14 +47,13 @@ export function configureProgramForMultiEmit(
     args: {
         innerProgram: TTypescript.Program,
         ts: ExtendedTypeScript,
-        moduleKindsToEmit: ICachedEmitModuleKind[],
+        outputsToBeEmitted: ICachedOutputsToBeEmitted[],
         mode: 'transpile' | 'declaration' | 'both',
         buildFolderPath: string,
         logger?: IScopedLogger;
     }): { changedFiles: Set<TTypescript.SourceFile>; } {
 
-    const { innerProgram, ts, moduleKindsToEmit, mode, buildFolderPath, logger } = args;
-
+    const { innerProgram, ts, outputsToBeEmitted, mode, buildFolderPath, logger } = args;
     interface IProgramWithMultiEmit extends TTypescript.Program {
         // Attach the originals to the Program instance to avoid modifying the same Program twice.
         // Don't use WeakMap because this Program could theoretically get a { ... } applied to it.
@@ -76,52 +75,68 @@ export function configureProgramForMultiEmit(
     }
 
     let foundPrimary: boolean = false;
-    let defaultModuleKind: TTypescript.ModuleKind;
+    let defaultModule: TTypescript.ModuleKind;
 
-    const multiEmitMap: Map<ICachedEmitModuleKind, TTypescript.CompilerOptions> = new Map();
+    const multiEmitMap: Map<ICachedOutputsToBeEmitted, TTypescript.CompilerOptions> = new Map();
 
-    for (const moduleKindToEmit of moduleKindsToEmit) {
-        const kindCompilerOptions: TTypescript.CompilerOptions = moduleKindToEmit.isPrimary
+    for (const toBeEmitted of outputsToBeEmitted) {
+        const compilerOptions: TTypescript.CompilerOptions = toBeEmitted.isPrimary
             ? {
                 ...innerGetCompilerOptions()
             }
             : {
-                ...innerGetCompilerOptions(),
-                module: moduleKindToEmit.moduleKind,
-                target: moduleKindToEmit.target,
-                outDir: moduleKindToEmit.outFolderPath,
+                ...toBeEmitted.typescriptResolvedOptions,
+                // ...innerGetCompilerOptions(),
+                // module: moduleKindToEmit.moduleKind,
+                // target: moduleKindToEmit.target,
+                // outDir: moduleKindToEmit.outDir,
 
                 // Don't emit declarations for secondary module kinds
-                declaration: false,
-                declarationMap: false
+                // declaration: false,
+                // declarationMap: false
             };
-        if (!kindCompilerOptions.outDir) {
+
+        if (!compilerOptions.outDir) {
             throw new InternalError('Expected compilerOptions.outDir to be assigned');
         }
         if (mode === 'transpile') {
-            kindCompilerOptions.declaration = false;
-            kindCompilerOptions.declarationMap = false;
+            compilerOptions.declaration = false;
+            compilerOptions.declarationMap = false;
         } else if (mode === 'declaration') {
-            kindCompilerOptions.emitDeclarationOnly = true;
+            compilerOptions.emitDeclarationOnly = true;
         }
 
-        if (moduleKindToEmit.isPrimary || mode !== 'declaration') {
-            multiEmitMap.set(moduleKindToEmit, kindCompilerOptions);
+
+        if (toBeEmitted.isPrimary || mode !== 'declaration') {
+            multiEmitMap.set(toBeEmitted, compilerOptions);
+
+            if (logger) {
+                const module: string | undefined =
+                    Object.entries(ts.ModuleKind).find(([ , value ]) => value === toBeEmitted.typescriptResolvedOptions.module)?.[ 0 ];
+
+                const target: string | undefined =
+                    Object.entries(ts.ScriptTarget).find(([ , value ]) => value === toBeEmitted.typescriptResolvedOptions.target)?.[ 0 ];
+
+                logger.terminal.writeLine(
+                    `will compile and emit (module: "${module}", target: "${target}")` +
+                    ` --> "${path.relative(buildFolderPath, toBeEmitted.typescriptResolvedOptions.outDir || '')}`
+                );
+            }
         }
 
-        if (moduleKindToEmit.isPrimary) {
+        if (toBeEmitted.isPrimary) {
             if (foundPrimary) {
                 throw new Error('Multiple primary module emit kinds encountered.');
             } else {
                 foundPrimary = true;
             }
 
-            defaultModuleKind = moduleKindToEmit.moduleKind;
+            defaultModule = toBeEmitted.typescriptResolvedOptions.module || ts.ModuleKind.CommonJS;
         }
     }
 
     const changedFiles: Set<TTypescript.SourceFile> = new Set();
-    const outdirDone: Set<string> = new Set();
+    // const outdirDone: Set<string> = new Set();
 
     program.emit = (
         targetSourceFile?: TTypescript.SourceFile,
@@ -130,6 +145,7 @@ export function configureProgramForMultiEmit(
         emitOnlyDtsFiles?: boolean,
         customTransformers?: TTypescript.CustomTransformers
     ) => {
+
         if (emitOnlyDtsFiles) {
             return program[ INNER_EMIT_SYMBOL ]!(
                 targetSourceFile,
@@ -139,6 +155,7 @@ export function configureProgramForMultiEmit(
                 customTransformers
             );
         }
+
 
         if (targetSourceFile && changedFiles) {
             changedFiles.add(targetSourceFile);
@@ -151,32 +168,38 @@ export function configureProgramForMultiEmit(
         let emitSkipped: boolean = false;
 
         try {
-            for (const [ moduleKindToEmit, kindCompilerOptions ] of multiEmitMap) {
-                program.getCompilerOptions = () => kindCompilerOptions;
+            for (const [ moduleToEmit, compilerOptions ] of multiEmitMap) {
+                program.getCompilerOptions = () => compilerOptions;
                 // Need to mutate the compiler options for the `module` field specifically, because emitWorker() captures
                 // options in the closure and passes it to `ts.getTransformers()`
-                originalCompilerOptions.module = moduleKindToEmit.moduleKind;
+                originalCompilerOptions.module = moduleToEmit.typescriptResolvedOptions.module;
 
-                const moduleTarget = JSON.stringify({ moduleKind: moduleKindToEmit.moduleKind, target: moduleKindToEmit.target });
+                // const moduleTarget: string = JSON.stringify({
+                //     moduleKind: moduleToEmit.typescriptResolvedOptions.module,
+                //     target: moduleToEmit.typescriptResolvedOptions.target
+                // });
 
-                if (logger && !outdirDone.has(moduleTarget)) {
+                // if (logger && !outdirDone.has(moduleTarget)) {
 
-                    const module = Object.entries(ts.ModuleKind).find(([ , value ]) => value === moduleKindToEmit.moduleKind)?.[ 0 ];
-                    const target = Object.entries(ts.ScriptTarget).find(([ , value ]) => value === moduleKindToEmit.target)?.[ 0 ];
+                //     const module: string | undefined =
+                //         Object.entries(ts.ModuleKind).find(([ , value ]) => value === moduleToEmit.typescriptResolvedOptions.module)?.[ 0 ];
 
-                    logger.terminal.writeLine(
-                        `compiling (module: "${module}", target: "${target}")` +
-                        ` --> "${path.relative(buildFolderPath, moduleKindToEmit.outFolderPath)}`
-                    );
+                //     const target: string | undefined =
+                //         Object.entries(ts.ScriptTarget).find(([ , value ]) => value === moduleToEmit.typescriptResolvedOptions.target)?.[ 0 ];
 
-                    // console.log(kindCompilerOptions);
-                    outdirDone.add(moduleTarget);
-                }
+                //     logger.terminal.writeLine(
+                //         `compiling (module: "${module}", target: "${target}")` +
+                //         ` --> "${path.relative(buildFolderPath, moduleToEmit.typescriptResolvedOptions.outDir || '')}`
+                //     );
+
+                //     // console.log(kindCompilerOptions);
+                //     outdirDone.add(moduleTarget);
+                // }
 
 
                 const flavorResult: TTypescript.EmitResult = program[ INNER_EMIT_SYMBOL ]!(
                     targetSourceFile,
-                    writeFile && wrapWriteFile(writeFile, moduleKindToEmit.jsExtensionOverride),
+                    writeFile && wrapWriteFile(writeFile, moduleToEmit.jsExtensionOverride),
                     cancellationToken,
                     emitOnlyDtsFiles,
                     customTransformers
@@ -188,7 +211,7 @@ export function configureProgramForMultiEmit(
                     diagnostics.push(diagnostic);
                 }
 
-                if (moduleKindToEmit.moduleKind === defaultModuleKind) {
+                if (moduleToEmit.typescriptResolvedOptions.module === defaultModule) {
                     defaultModuleKindResult = flavorResult;
                 }
             }
@@ -205,7 +228,7 @@ export function configureProgramForMultiEmit(
         } finally {
             // Restore the original compiler options and module kind for future calls
             program.getCompilerOptions = program[ INNER_GET_COMPILER_OPTIONS_SYMBOL ]!;
-            originalCompilerOptions.module = defaultModuleKind;
+            originalCompilerOptions.module = defaultModule;
         }
     };
     return { changedFiles };

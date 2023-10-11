@@ -8,20 +8,13 @@
  */
 
 export type {
-    IPartialTsconfigCompilerOptions,
-    IPartialTsconfig,
-    IChangedFilesHookOptions,
-    ITypeScriptPluginAccessor
+    IChangedFilesHookOptions, IPartialTsconfig, IPartialTsconfigCompilerOptions, ITypeScriptPluginAccessor
 } from './TypeScriptPlugin';
 
 export type {
-    IEmitModuleKind,
-    IStaticAssetsCopyConfiguration,
-    ITypeScriptConfigurationJson,
+    IStaticAssetsCopyConfiguration, ITsConfigJson, IRigTypeScriptConfigurationJson as ITypeScriptConfigurationJson, ITypescriptConfig
 } from './plugin-options';
 
 export {
-    PLUGIN_NAME as TypeScriptPluginName,
-    loadTypeScriptConfigurationFileAsync,
-    loadPartialTsconfigFileAsync
+    PLUGIN_NAME as TypeScriptPluginName, loadPartialTsconfigJsonFileAsync as loadPartialTsconfigFileAsync, loadRigTypeScriptConfigurationFileAsync as loadTypeScriptConfigurationFileAsync
 } from './TypeScriptPlugin';
