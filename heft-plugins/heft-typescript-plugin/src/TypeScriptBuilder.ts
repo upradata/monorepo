@@ -9,13 +9,11 @@ import * as TTypescript from 'typescript';
 import { Worker } from 'worker_threads';
 import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
 
-import type { HeftConfiguration, IScopedLogger } from '@rushstack/heft';
+import type { IScopedLogger } from '@rushstack/heft';
 import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTypings/TypeScriptInternals';
 import type { PerformanceMeasurer, PerformanceMeasurerAsync } from './Performance';
 import type { IRigTypeScriptConfigurationJson, ITypescriptConfig } from './plugin-options';
 import type { ICachedOutputsToBeEmitted, ITranspilationRequestMessage, ITranspilationResponseMessage, ITypescriptWorkerData } from './types';
-import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
-import { IPartialTsconfig } from './TypeScriptPlugin';
 
 
 type RequiredITypeScriptConfigurationJson = {
@@ -26,7 +24,7 @@ type RequiredITypeScriptConfigurationJson = {
 export interface ITypeScriptBuilderConfiguration extends Omit<
     RequiredITypeScriptConfigurationJson, /* 'project' | */ 'tsconfigs' | 'staticAssetsToCopy' /* | 'emit.inheritanceType' */
 > {
-    rigConfig: HeftConfiguration[ 'rigConfig' ];
+    // rigConfig: HeftConfiguration[ 'rigConfig' ];
     tsconfigs: ITypescriptConfig[];
 
     /**
@@ -202,13 +200,13 @@ export class TypeScriptBuilder {
 
 
 
-    private async _loadTsconfig(args: {
+    private _loadTsconfig(args: {
         ts: ExtendedTypeScript;
         tsconfigPath: string;
         existingOptions?: TTypescript.CompilerOptions;
         overrideOptions?: TTypescript.CompilerOptions;
         tsCacheFilePath?: string;
-    }): Promise<TTypescript.ParsedCommandLine> {
+    }): TTypescript.ParsedCommandLine {
         const { ts, tsconfigPath, existingOptions, overrideOptions = {}, tsCacheFilePath } = args;
 
         const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
@@ -233,29 +231,6 @@ export class TypeScriptBuilder {
         if (tsconfig.options.incremental) {
             tsconfig.options.tsBuildInfoFile = tsCacheFilePath;
         }
-
-        // const schemaPath: string = `${__dirname}/schemas/anything.schema.json`;
-
-        // const partialTsConfigJson: IPartialTsconfig = await new ConfigurationFile<IPartialTsconfig>({
-        //     projectRelativeFilePath: tsconfigPath,
-        //     jsonSchemaPath: schemaPath,
-        //     propertyInheritance: {
-        //         compilerOptions: {
-        //             inheritanceType: InheritanceType.merge
-        //         }
-        //     },
-        //     jsonPathMetadata: {
-        //         '$.compilerOptions.outDir': {
-        //             pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
-        //         }
-        //     }
-        // }).loadConfigurationFileForProjectAsync(
-        //     this._typescriptTerminal,
-        //     this._configuration.buildFolderPath,
-        //     this._configuration.rigConfig
-        // );
-
-        // this._typescriptTerminal.writeLine(`__________   ${partialTsConfigJson}   _________________`);
 
         return {
             ...tsconfig,
@@ -446,7 +421,7 @@ export class TypeScriptBuilder {
     public async _runWatchAsync(tool: ITypeScriptTool): Promise<void> {
         const {
             ts,
-            measureAsync,
+            measureSync,
             pendingOperations,
             rawDiagnostics,
             pendingTranspilePromises
@@ -458,9 +433,9 @@ export class TypeScriptBuilder {
             const { tsconfigPath } = typescriptConfig;
 
             //#region CONFIGURE
-            const { duration: configureDurationMs, primaryTsConfig } = await measureAsync('Configure', async () => {
+            const { duration: configureDurationMs, primaryTsConfig } = measureSync('Configure', () => {
                 // eslint-disable-next-line @typescript-eslint/typedef
-                const outputs = await this._initOutputsToBeEmitted(ts);
+                const outputs = this._initOutputsToBeEmitted(ts);
                 const primaryTsConfig: TTypescript.ParsedCommandLine = outputs.find(o => o.outputToBeEmitted.isPrimary)!.parsedTsconfig;
 
                 return {
@@ -507,17 +482,17 @@ export class TypeScriptBuilder {
     }
 
     public async _runBuildAsync(tool: ITypeScriptTool): Promise<void> {
-        const { ts, measureAsync, measureSync, pendingTranspilePromises } = tool;
+        const { ts, measureSync, pendingTranspilePromises } = tool;
 
         //#region CONFIGURE
         const {
             duration: configureDurationMs,
             primaryTsConfig,
             compilerHost
-        } = await measureAsync('Configure', async () => {
+        } = measureSync('Configure', () => {
 
             // eslint-disable-next-line @typescript-eslint/typedef
-            const outputs = await this._initOutputsToBeEmitted(ts);
+            const outputs = this._initOutputsToBeEmitted(ts);
             const primaryTsConfig: TTypescript.ParsedCommandLine = outputs.find(o => o.outputToBeEmitted.isPrimary)!.parsedTsconfig;
 
             const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(
@@ -653,7 +628,7 @@ export class TypeScriptBuilder {
     public async _runSolutionBuildAsync(tool: ITypeScriptTool): Promise<void> {
         this._typescriptTerminal.writeVerboseLine(`Using solution mode`);
 
-        const { ts, measureAsync, rawDiagnostics, pendingTranspilePromises } = tool;
+        const { ts, measureSync, rawDiagnostics, pendingTranspilePromises } = tool;
         rawDiagnostics.length = 0;
 
         if (!tool.solutionBuilder) {
@@ -661,8 +636,8 @@ export class TypeScriptBuilder {
             const {
                 duration: configureDurationMs,
                 solutionBuilderHost
-            } = await measureAsync('Configure', async () => {
-                await this._initOutputsToBeEmitted(ts);
+            } = measureSync('Configure', () => {
+                this._initOutputsToBeEmitted(ts);
                 const _solutionBuilderHost: TSolutionHost = this._buildSolutionBuilderHost(tool);
 
                 return {
@@ -869,10 +844,10 @@ export class TypeScriptBuilder {
         return diagnostic.category;
     }
 
-    private _initOutputsToBeEmitted(ts: ExtendedTypeScript): Promise<{
+    private _initOutputsToBeEmitted(ts: ExtendedTypeScript): {
         parsedTsconfig: TTypescript.ParsedCommandLine;
         outputToBeEmitted: ICachedOutputsToBeEmitted;
-    }[]> {
+    }[] {
 
         this._outputsToBeEmitted = [];
 
@@ -891,10 +866,10 @@ export class TypeScriptBuilder {
         // tsCacheFilePath: ${this.__tsCacheFilePath},
         // _tsconfig: ${JSON.stringify(_tsconfig, null, 4)}`);
 
-        return Promise.all(this._configuration.tsconfigs.map(async tsconfig => {
+        return this._configuration.tsconfigs.map(tsconfig => {
             const { tsconfigPath } = tsconfig;
 
-            const parsedTsconfig: TTypescript.ParsedCommandLine = /* tsconfigPath ? */await this._loadTsconfig({
+            const parsedTsconfig: TTypescript.ParsedCommandLine = /* tsconfigPath ? */ this._loadTsconfig({
                 ts,
                 tsconfigPath,
                 tsCacheFilePath: this.__tsCacheFilePath,
@@ -904,10 +879,10 @@ export class TypeScriptBuilder {
             if (this._validateTsconfig(ts, parsedTsconfig, tsconfig)) {
                 return { parsedTsconfig, outputToBeEmitted: this._outputsToBeEmitted.at(-1)! };
             }
-        }).filter(Boolean)) as Promise<{
+        }).filter(Boolean) as {
             parsedTsconfig: TTypescript.ParsedCommandLine;
             outputToBeEmitted: ICachedOutputsToBeEmitted;
-        }[]>;
+        }[];
     }
 
     private _validateTsconfig(

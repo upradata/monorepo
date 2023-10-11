@@ -519,7 +519,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
 
         // Build out the configuration
         const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
-            rigConfig: heftConfiguration.rigConfig,
+           // rigConfig: heftConfiguration.rigConfig,
             buildFolderPath: heftConfiguration.buildFolderPath,
             // Build metadata is just another build output, but we put it in the temp folder because it will
             // usually be discarded when published.
