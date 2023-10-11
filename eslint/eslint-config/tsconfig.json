@@ -1,0 +1,13 @@
+{
+    "extends": "./node_modules/@upradata/heft-node-rig/profiles/default/tsconfig.ide.json",
+    "compilerOptions": {
+        "module": "CommonJS"
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.d.ts",
+        "src/**/*.js",
+        "src/**/*.jsx"
+    ]
+}

@@ -1,0 +1,88 @@
+import typescriptEslintRecommended from '../node_modules/@typescript-eslint/eslint-plugin/dist/configs/recommended';
+import { defineConfig } from 'eslint-define-config';
+import { jsRules, jsSettings } from './js-rules';
+import { tsRules, tsSettings } from './ts-rules';
+
+import type { Rules } from 'eslint-define-config';
+import { Profile } from './profile';
+
+
+// This is a workaround for https://github.com/eslint/eslint/issues/3458
+require('@rushstack/eslint-config/patch/modern-module-resolution');
+
+
+export const buildRules = (profile: Profile) => defineConfig({
+    env: {
+        es2023: true,
+        browser: false,
+        node: true
+    },
+    extends: [
+        // eslint-config- prefix can be omitted
+        // The plugins property value can omit the eslint-plugin- prefix of the package name
+        'eslint:recommended',
+        'plugin:@typescript-eslint/recommended', // done in @rushstack/eslint-config
+        // 'airbnb-base',
+        'airbnb/hooks',
+        'airbnb/whitespace',
+        'airbnb-base/whitespace',
+        `@rushstack/eslint-config/profile/${profile}`,
+        '@rushstack/eslint-config/mixins/tsdoc',
+        'prettier'
+
+    ],
+    plugins: [
+        'import',
+        ...(profile === 'web-app' ? [ 'jsx-a11y' ] : []),
+        ...(profile === 'web-app' ? [ 'react' ] : []),
+        'prettier'
+    ],
+    parserOptions: {
+        ecmaVersion: 2023,
+        sourceType: 'module',
+        ecmaFeatures: {
+            impliedStrict: true,
+            jsx: profile === 'web-app'
+        },
+        warnOnUnsupportedTypeScriptVersion: true
+    },
+    rules: jsRules(profile),
+    settings: jsSettings(profile),
+    overrides: [
+        {
+            files: [ '*.ts', '*.tsx' ],
+            /*  parserOptions: {
+                 project: [ 'tsconfig.json', 'tsconfig.lib.json' ], // Specify it only for TypeScript files
+                 // Override logger function with noop, to avoid unsupported typescript version warnings.
+                 // loggerFn: () => { },
+             }, */
+            parser: '@typescript-eslint/parser',
+            plugins: [
+                /* 'import/config/typescript', I prefered to copy/paste it to cherry-pick what I want */
+                // '@typescript-eslint'
+            ],
+            // Workaround for no nested extends possible.
+            // see https://github.com/eslint/eslint/issues/8813
+            // working solution would be following, if we had nested extends
+            // extends: [
+            //   'eslint:recommended',
+            //   'airbnb-base',
+            //   'plugin:@typescript-eslint/recommended',
+            //   'prettier/@typescript-eslint',
+            //   'prettier',
+            // ],
+            rules: {
+                ...(typescriptEslintRecommended.rules as Rules),
+                ...jsRules(profile),
+                ...tsRules(profile)
+            },
+            settings: tsSettings(profile),
+        },
+        {
+            files: [ '*.spec.ts' ],
+            env: {
+                jest: true,
+            },
+        },
+    ]
+});

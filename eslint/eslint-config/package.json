@@ -1,0 +1,61 @@
+{
+    "name": "@upradata/eslint-config",
+    "version": "1.0.0",
+    "description": "A TypeScript ESLint ruleset designed for large teams and projects",
+    "license": "MIT",
+    "repository": {
+        "url": "https://github.com/microsoft/rushstack.git",
+        "type": "git",
+        "directory": "eslint/eslint-config"
+    },
+    "author": "El Pupi <elpupi@upradata.com> (https://github.com/elpupi)",
+    "homepage": "",
+    "scripts": {
+        "_phase:build": "",
+        "build": "heft build",
+        "build:watch": "heft build-watch",
+        "rebuild": "heft build --clean",
+        "test": "heft test"
+    },
+    "keywords": [
+        "eslint",
+        "eslint-config",
+        "monorepo",
+        "rush",
+        "scalable",
+        "scale",
+        "typescript"
+    ],
+    "dependencies": {
+        "@rushstack/eslint-config": "3.3.4",
+        "@rushstack/eslint-patch": "1.4.0",
+        "@rushstack/eslint-plugin": "~0.13.0",
+        "@rushstack/eslint-plugin-packlets": "0.8.0",
+        "@rushstack/eslint-plugin-security": "0.7.0",
+        "@rushstack/heft": "0.61.0",
+        "@typescript-eslint/eslint-plugin": "~6.7.2",
+        "@typescript-eslint/experimental-utils": "5.62.0",
+        "@typescript-eslint/parser": "^6.7.2",
+        "@typescript-eslint/typescript-estree": "^6.7.2",
+        "@upradata/heft-node-rig": "workspace:*",
+        "eslint": "~8.49.0",
+        "eslint-config-airbnb": "^19.0.4",
+        "eslint-config-prettier": "^9.0.0",
+        "eslint-define-config": "~1.23.0",
+        "eslint-import-resolver-exports": "1.0.0-beta.5",
+        "eslint-import-resolver-typescript": "~3.6.1",
+        "eslint-plugin-import": "^2.28.1",
+        "eslint-plugin-jsx-a11y": "^6.7.1",
+        "eslint-plugin-promise": "~6.1.1",
+        "eslint-plugin-react": "~7.33.2",
+        "eslint-plugin-tsdoc": "~0.2.17",
+        "tslib": "~2.6.2"
+    },
+    "devDependencies": {
+        "@types/node": "20.6.3",
+        "eslint-config-airbnb-base": "~15.0.0",
+        "eslint-config-prettier": "^9.0.0",
+        "typescript": "~5.2.2"
+    },
+    "publishConfigAccess": "public"
+}
