@@ -1,5 +1,8 @@
 {
     "files.associations": {
         "*.json": "jsonc"
-    }
+    },
+    /* "eslint.options": {
+        "overrideConfigFile": ".eslintrc.js"
+    }, */
 }
