@@ -76,7 +76,7 @@ export interface ITypeScriptPluginAccessor {
 }
 
 // @beta (undocumented)
-export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined): Promise<IPartialTsconfig[]>;
+export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, rigTypeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined): Promise<IPartialTsconfig[]>;
 
 // @beta (undocumented)
 export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<ITypeScriptConfigurationJson>;

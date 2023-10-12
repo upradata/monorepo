@@ -86,6 +86,7 @@
         // "example1": "^1.0.0",
         // "example2": "npm:@company/example2@^1.0.0"
         "eslint-plugin-import": "npm:eslint-plugin-i@latest"
+        // "eslint-plugin-import": "npm:eslint-plugin-i@2.28.1"
     },
     /**
    * The `globalPeerDependencyRules` setting provides various settings for suppressing validation errors

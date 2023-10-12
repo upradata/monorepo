@@ -119,6 +119,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@upradata/stats",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@upradata/template-string-style",
       "allowedCategories": [ "libraries" ]
     },
@@ -168,7 +172,7 @@
     },
     {
       "name": "eslint-config-airbnb-base",
-      "allowedCategories": [ "rush" ]
+      "allowedCategories": [ "libraries", "rush" ]
     },
     {
       "name": "eslint-config-prettier",
