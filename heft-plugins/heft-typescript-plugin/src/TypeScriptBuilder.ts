@@ -914,9 +914,12 @@ export class TypeScriptBuilder {
         const outDirs: Map<string, IEmitReason> = new Map();
 
         if (!tsconfig.options.module) {
+            // throw new Error(
+            //     'If the module tsconfig compilerOption is not provided, the builder must be provided with the ' +
+            //     'additionalModuleKindsToEmit configuration option. \n' + JSON.stringify(tsconfig)
+            // );
             throw new Error(
-                'If the module tsconfig compilerOption is not provided, the builder must be provided with the ' +
-                'additionalModuleKindsToEmit configuration option. \n' + JSON.stringify(tsconfig)
+                'tsconfig compilerOption.module is not provided.\n' + JSON.stringify(tsconfig)
             );
         }
 

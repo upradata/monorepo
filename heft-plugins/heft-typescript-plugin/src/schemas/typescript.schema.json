@@ -909,8 +909,13 @@
                     "tsconfigPath": {
                         "type": "string"
                     },
-                    "compilerOptions": {
-                        "$ref": "#/$defs/compilerOptions"
+                    "tsconfigJson": {
+                        "type": "object",
+                        "properties": {
+                            "compilerOptions": {
+                                "$ref": "#/$defs/compilerOptions"
+                            }
+                        }
                     },
                     "jsExtension": {
                         "type": "string",

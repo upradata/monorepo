@@ -96,6 +96,11 @@ export async function loadRigTypeScriptConfigurationFileAsync(
                     // When merging objects, arrays will be automatically appended
                     inheritanceType: InheritanceType.merge
                 }
+            },
+            jsonPathMetadata: {
+                '$.tsconfigJson.compilerOptions.outDir': {
+                    pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
+                }
             }
         };
 
@@ -170,12 +175,12 @@ const resolveTsconfigFilePath = async (
 export async function loadPartialTsconfigJsonFileAsync(
     heftConfiguration: HeftConfiguration,
     terminal: ITerminal,
-    typeScriptConfigurationJson: IRigTypeScriptConfigurationJson | undefined
+    rigTypeScriptConfigurationJson: IRigTypeScriptConfigurationJson | undefined
 ): Promise<IPartialTsconfig[]> {
     const { buildFolderPath } = heftConfiguration;
 
     const tsConfigs: IPartialTsconfig[] = await Promise.all(
-        typeScriptConfigurationJson?.tsconfigs.map(async tsconfig => {
+        rigTypeScriptConfigurationJson?.tsconfigs.map(async tsconfig => {
 
             if (!tsconfig.tsconfigPath) {
                 return Promise.resolve(tsconfig.tsconfigJson || {});
@@ -236,7 +241,7 @@ export async function loadPartialTsconfigJsonFileAsync(
                     terminal,
                     buildFolderPath,
                     heftConfiguration.rigConfig
-                ).then(config => ({ ...config, ...tsconfig.tsconfigJson }));
+                ).then(tsconfigJson => ({ ...tsconfigJson, ...tsconfig.tsconfigJson }));
 
             _partialTsconfigFilePromiseCache.set(cacheKey, partialTsconfigFilePromise!);
 
@@ -519,7 +524,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
 
         // Build out the configuration
         const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
-           // rigConfig: heftConfiguration.rigConfig,
+            // rigConfig: heftConfiguration.rigConfig,
             buildFolderPath: heftConfiguration.buildFolderPath,
             // Build metadata is just another build output, but we put it in the temp folder because it will
             // usually be discarded when published.
