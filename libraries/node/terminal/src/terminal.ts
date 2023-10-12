@@ -9,8 +9,8 @@ export class TitleOptions {
     // backward-compatible => now use type === 'band'
     isBig?: boolean = false;
     type?: 'one-line' | 'two-strips' | 'top-strip' | 'bottom-strip' | 'band' = 'one-line';
-    transform?: (s: string) => string = s => s;
     alignCenter?: boolean;
+    transform?: (s: string) => string = s => s;
 }
 
 
@@ -43,7 +43,7 @@ export class Terminal {
         console.log(this.fullWidth(text, style));
     }
 
-    colorLine(style: StyleTransformString<string>) {
+    colorLine(style: StyleTransformString<string> | undefined) {
         return this.fullWidth(' ', style);
     }
 
@@ -52,7 +52,14 @@ export class Terminal {
     }
 
     title(title: string, options: TitleOptions = {}): string {
-        const { style, bgStyle, isBig, type, transform, alignCenter = true } = Object.assign(new TitleOptions(), options);
+        const {
+            style = (s: string) => s,
+            bgStyle,
+            isBig,
+            type,
+            alignCenter = true,
+            transform = (s: string) => s,
+        } = Object.assign(new TitleOptions(), options);
 
         const titleType = isBig ? 'band' : type;
 
@@ -66,11 +73,12 @@ export class Terminal {
         if (titleType === 'band')
             return `${bg}\n${message}\n${bg}`;
 
-        if (titleType.includes('strip')) {
+        if (titleType?.includes('strip')) {
             switch (titleType) {
                 case 'two-strips': return `${bg}\n${message}\n${bg}`;
                 case 'top-strip': return `${bg}\n${message}`;
                 case 'bottom-strip': return `${message}\n${bg}`;
+                default: throw new Error(`title type "${titleType}" not implemented`);
             }
         }
 

@@ -12,15 +12,15 @@ export const poll = <S, E>(handler: () => TT$<{ stop: boolean; error?: E; succes
 
     // Strangely, we need to wait before the OS writes the file on the disk.
     // We wait a maximum 2s
-    return new Promise<S>((res, rej) => {
+    return new Promise<S | undefined>((resolve, reject) => {
         const id = setInterval(async () => {
             const { error, success, stop } = await handler();
 
             if (stop) {
-                res(success);
+                resolve(success);
                 clearInterval(id);
             } else if (totalWait > duration) {
-                rej(error);
+                reject(error);
                 clearInterval(id);
             }
 

@@ -43,15 +43,6 @@ export interface TableStringOption {
 }
 
 
-
-const oldAlignString = alignString.alignString;
-(alignString as RemoveReadOnly<typeof alignString>).alignString = (subject: string, containerWidth: number, alignment: Alignment) => {
-    if (alignment === 'center')
-        return alignCenter(subject, containerWidth - stringWidth(subject));
-
-    return oldAlignString(subject, containerWidth, alignment);
-};
-
 // Fix bug in table.alignCenter where instead of whiteSpaces % 2 there was halfWidth % 2!!
 const alignCenter = (subject: string, whiteSpaces: number) => {
     let halfWidth: number;
@@ -64,6 +55,17 @@ const alignCenter = (subject: string, whiteSpaces: number) => {
     halfWidth = Math.floor(halfWidth);
     return ' '.repeat(halfWidth) + subject + ' '.repeat(halfWidth + 1);
 };
+
+
+const oldAlignString = alignString.alignString;
+
+(alignString as RemoveReadOnly<typeof alignString>).alignString = (subject: string, containerWidth: number, alignment: Alignment) => {
+    if (alignment === 'center')
+        return alignCenter(subject, containerWidth - stringWidth(subject));
+
+    return oldAlignString(subject, containerWidth, alignment);
+};
+
 
 
 // I use makeConfig in this class and I use it with string|number while it is intending to use it with string only
@@ -90,7 +92,7 @@ export class TableString {
 
         this.userConfig = assignDefaultOption<TableConfig>({
             columnDefault: { truncate: 200 }
-        }, option.tableConfig);
+        }, option.tableConfig || {});
 
         this.maxWidth = assignRecursive({
             row: {
@@ -156,14 +158,14 @@ export class TableString {
 
     private resizeColumnsWidth(columnsWidth: number[], builtConfig: TableConfig) {
         // tslint:disable-next-line: prefer-const
-        const { width, indexToShrink } = this.maxWidth.row;
+        const { width, indexToShrink } = this.maxWidth.row || {};
 
         if (width && indexToShrink) {
 
             const nbCol = columnsWidth.length;
             // const { paddingLeft, paddingRight } = this.config.columns[ 0 ];
-            const paddingLeft = this.maxValue(Object.values(builtConfig.columns).map(c => c.paddingLeft));
-            const paddingRight = this.maxValue(Object.values(builtConfig.columns).map(c => c.paddingRight));
+            const paddingLeft = this.maxValue(Object.values(builtConfig.columns || []).map(c => c.paddingLeft).filter(Boolean) as number[]);
+            const paddingRight = this.maxValue(Object.values(builtConfig.columns || []).map(c => c.paddingRight).filter(Boolean) as number[]);
 
             const totalPaddingCells = nbCol * (paddingLeft + paddingRight) + (nbCol + 1); // we assume all rows have same padding (we could ...)
 

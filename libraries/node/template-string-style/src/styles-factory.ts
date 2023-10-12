@@ -1,6 +1,3 @@
-import colorsStyles from 'colors/lib/styles';
-import { supportsColor } from 'colors/lib/system/supports-colors';
-import colorsSafe from 'colors/safe';
 import {
     buildStyle,
     DefinedStringTransforms,
@@ -14,10 +11,14 @@ import {
     StyleTransform,
     ToString
 } from '@upradata/util';
-import { TerminalStyleNames } from './helpers';
+import colorsStyles from 'colors/lib/styles';
+import { supportsColor } from 'colors/lib/system/supports-colors';
+import * as colorsSafe from 'colors/safe';
+
+import type { TerminalStyleNames } from './helpers/terminal-styles.type';
 
 
-export * from '@upradata/util/lib/template-string/export';
+export * from '@upradata/util/lib-esnext/template-string/export';
 type AllTerminalStyleNames = (keyof typeof colorsSafe) | TerminalStyleNames;
 type TerminalStyleStringTranforms = Record<AllTerminalStyleNames, StyleTransform> & { none: (s: string) => string; };
 

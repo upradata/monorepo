@@ -38,7 +38,10 @@ export type Styles<AllTransforms> = Style & {
 };
 
 
-export const transformToStyleTemplate = (transform: (arg: any) => string) => (strings: TemplateStringsArray, ...keys: ToString[]) => transform(recreateString(strings, ...keys));
+export const transformToStyleTemplate =
+    (transform: (arg: any) => string) =>
+        (strings: TemplateStringsArray, ...keys: ToString[]) =>
+            transform(recreateString(strings, ...keys));
 
 
 const commonTagsKeys = keys(new CommonTagStyle());

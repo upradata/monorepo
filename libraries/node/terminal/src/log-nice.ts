@@ -15,7 +15,7 @@ const defaultV = {
 
 
 export type BracketStyle = (v: '{' | '}' | '[' | ']') => string;
-export type Indentize = (options: { level: number, size: number, symbol: string; }) => string;
+export type Indentize = (options: { level: number; size: number; symbol: string; }) => string;
 
 export type NiceOptions = {
     indent?: number;
@@ -46,7 +46,7 @@ export const nice = (v: any, options: NiceOptions = {}): string => {
 
         if (isArray(u) || isPlainObject(u)) {
             if (ref.has(u))
-                return value(`<circular ref>: "${ref.get(u).toString()}"`);
+                return value(`<circular ref>: "${ref.get(u)?.toString()}"`);
 
             ref.set(u, key);
 

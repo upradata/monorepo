@@ -1,6 +1,6 @@
 export class SyncAsync<T = any> {
-    sync: T = undefined;
-    async: Promise<T> = undefined;
+    sync: T = undefined as any;
+    async: Promise<T> = undefined as any;
 }
 
 export type SyncAsyncMode = keyof SyncAsync;
