@@ -20,10 +20,7 @@
                     "includeGlobs": [
                         "dist",
                         "lib",
-                        "lib-commonjs",
-                        "lib-es5",
-                        "lib-es6",
-                        "lib-esm"
+                        "lib-*"
                     ]
                 }
             ],
