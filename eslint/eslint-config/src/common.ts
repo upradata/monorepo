@@ -29,10 +29,9 @@ export const buildRules = (profile: Profile) => defineConfig({
         'eslint:recommended',
         // 'plugin:import/recommended',
         'plugin:import/typescript',
-        // 'airbnb-base',
         'airbnb/hooks',
-        'airbnb/whitespace',
-        'airbnb-base/whitespace',
+        // 'airbnb/whitespace',
+        require.resolve('./airbnb'),
         'prettier'
     ],
     plugins: [

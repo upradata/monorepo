@@ -3,7 +3,7 @@
  */
 {
     "$schema": "../../../heft-plugins/heft-typescript-plugin/src/schemas/typescript.schema.json",
-    /* "extends": "../../../rigs/heft-node-rig/profiles/default/config/typescript.json",
+    "extends": "../../../rigs/heft-node-rig/profiles/default/config/typescript.json",
     "additionalModuleKindsToEmit.inheritanceType": "replace",
     "additionalModuleKindsToEmit": [
         {
@@ -11,17 +11,6 @@
             "target": "ES2015",
             "outFolderName": "lib"
             // "jsExtension": "cjs"
-        }
-    ] ,*/
-    "tsconfigs": [
-        {
-            "tsconfigPath": "node_modules/@upradata/heft-node-rig/profiles/default/tsconfig.es6.json",
-            "tsconfigJson": {
-                "compilerOptions": {
-                    "outDir": "lib"
-                }
-            },
-            "isPrimary": true
         }
     ]
 }

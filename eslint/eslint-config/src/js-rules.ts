@@ -98,12 +98,12 @@ export const jsRules = (_profile: Profile): Rules => ({
     'object-curly-spacing': [ 'error', 'always' ],
     'array-bracket-spacing': [ 'error', 'always' ],
     'lines-between-class-members': 'off',
-    'react/jsx-filename-extension': [ 'warn', { allow: 'as-needed', extensions: [ '.jsx', '.tsx' ] } ],
+   // 'react/jsx-filename-extension': [ 'warn', { allow: 'as-needed', extensions: [ '.jsx', '.tsx' ] } ],
 
     // there is a bug
     /*
-     * [build:lint]    Configuration for rule "promise/param-names" is invalid:
-     * [build:lint]    Value [{"resolvePattern":"^_?(resolve)$","rejectPattern":"^_?(reject)$"}] should NOT have more than 0 items.
+     * [build:lint]    Configuration for rule 'promise/param-names' is invalid:
+     * [build:lint]    Value [{'resolvePattern':'^_?(resolve)$','rejectPattern':'^_?(reject)$'}] should NOT have more than 0 items.
      * 'promise/param-names': [ 'warn', {
      *  resolvePattern: '^_?(resolve|res)$',
      *  rejectPattern: '^_?(reject|rej)$'

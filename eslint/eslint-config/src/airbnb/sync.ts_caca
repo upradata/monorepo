@@ -1,0 +1,16 @@
+declare module 'eslint' {
+    export const CLIEngine: new (...args: any[]) => any;
+}
+
+import { CLIEngine } from 'eslint';
+import { applyOnlyErrorOnRules } from './onlyErrorOnRules';
+
+export const init = () => {
+    const whitespaceRules = require('./rules').rules;
+    const baseConfig = require('../../node_modules/eslint-config-airbnb-base');
+
+    const cli = new CLIEngine({ baseConfig, useEslintrc: false });
+    const baseRules = cli.getConfigForFile(require.resolve('../../node_modules/eslint-config-airbnb-base')).rules;
+
+    return applyOnlyErrorOnRules(whitespaceRules, baseConfig, { baseRules });
+};
