@@ -1,3 +1,5 @@
+export * from './stat.files';
 export * from './stat';
 export * from './stats';
-export * from './stat.files';
+export * from './types';
+export * from './util';

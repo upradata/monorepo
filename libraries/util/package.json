@@ -20,6 +20,17 @@
         "lib-es6",
         "lib-esnext"
     ],
+    "exports": {
+        "./*": {
+            "import": "./lib-esnext/*",
+            "require": "./lib-es6/*",
+            "types": "./lib-esnext/*"
+        },
+        ".": {
+            "import": "./lib-esnext/index.js",
+            "require": "./lib-es6/index.js"
+        }
+    },
     "scripts": {
         "build": "heft build",
         "build:watch": "heft build-watch",

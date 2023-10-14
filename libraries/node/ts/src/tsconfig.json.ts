@@ -1,4 +1,4 @@
-import { /* CompilerOptions, */ TSConfigJSON } from 'types-tsconfig';
+import type { /* CompilerOptions, */ TSConfigJSON } from 'types-tsconfig';
 /* eslint-disable max-len */
 import ts from 'typescript';
 

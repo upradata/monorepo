@@ -19,7 +19,7 @@ export const lookupRoot = {
 // so I use _root and I put  (...paths: string[]) => in front of every helpers and directly fromDir(root())
 
 
-let _root: string = undefined;
+let _root: string | undefined = undefined;
 export const root = () => {
     if (isUndefined(_root))
         _root = lookupRoot.sync(process.cwd());

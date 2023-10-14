@@ -12,12 +12,13 @@
     "version": "2.0.0",
     "description": "Some utilities to handle nodejs modules",
     "sideEffects": false,
-    "main": "lib",
-    "types": "lib-esm",
-    "module": "lib-esm",
+    "main": "lib-es6",
+    "types": "lib-esnext",
+    "module": "lib-esnext",
     "files": [
-        "lib",
-        "lib-esm"
+        "lib-es5",
+        "lib-es6",
+        "lib-esnext"
     ],
     "esm": {
         "mainFields": [
@@ -25,14 +26,15 @@
             "main"
         ]
     },
-    "exports-bak": {
-        ".": {
-            "import": "./lib-esm/index.js",
-            "require": "./lib/index.js"
-        },
+    "exports": {
         "./*": {
-            "import": "./lib-esm/*",
-            "require": "./lib/*"
+            "import": "./lib-esnext/*",
+            "require": "./lib-es6/*",
+            "types": "./lib-esnext/*"
+        },
+        ".": {
+            "import": "./lib-esnext/index.js",
+            "require": "./lib-es6/index.js"
         }
     },
     "scripts": {

@@ -1,7 +1,7 @@
 import { Cache } from '@upradata/cache';
 import { readJson } from '@upradata/json';
 import { red, yellow } from '@upradata/template-string-style';
-import { TscCompiler } from '@upradata/ts';
+import { compileAndLoadModule } from '@upradata/ts';
 /* eslint-disable global-require */
 /* eslint-disable no-case-declarations */
 import fs from 'fs-extra';
@@ -81,16 +81,16 @@ export function requireModule<T = unknown, M extends ModuleFile = ModuleFile>(fi
                 if (options.cache || options.cacheFile) {
                     if (!cache.isChangedFiles(collectionName, [ filepath ])) {
                         // if filepath does not exist => no filePrint
-                        const compiledFile = cache.store.filePrint(filepath, collectionName)?.extra;
+                        const compiledFile = cache.store.filePrint(filepath, collectionName)?.extra as string;
                         // check if file still exists in the cache directory
                         if (compiledFile && fs.existsSync(compiledFile))
-                            return require(cache.store.filePrint(filepath, collectionName).extra);
+                            return require(compiledFile);
                     }
                 }
 
                 console.log(yellow`Compiling "${filepath}"`);
 
-                const jsFile = TscCompiler.compileAndLoadModule(filepath, {
+                const jsFile = compileAndLoadModule(filepath, {
                     ...options.tsconfig,
                     outDir: options.outDir,
                     deleteOutDir: options.deleteOutDir || false

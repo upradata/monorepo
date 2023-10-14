@@ -3,7 +3,7 @@ import path from 'node:path';
 
 
 export const absolutePath = async (options: { filename: string; dir: string; }) => {
-    const { filename: filename, dir } = options;
+    const { filename, dir } = options;
 
     await fs.ensureDir(dir);
 

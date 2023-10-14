@@ -1,16 +1,17 @@
 // import { createCompilerHost } from './compiler-host';
 
-import type { TsConfig } from './tsconfig.json';
+// import type { TsConfig } from './tsconfig.json';
 
+import { createTmpDir } from '@upradata/fs';
 import { AssignOptions, assignRecursive } from '@upradata/util';
 import fs from 'fs-extra';
 import path from 'node:path';
-import tsconfig from 'tsconfig';
+// import tsconfig from 'tsconfig';
 import ts from 'typescript';
 
 
 export const defaultTscOptions = (): ts.CompilerOptions => ({
-    noEmitOnError: false,
+    noEmitOnError: true, // false,
     noErrorTruncation: true,
     noImplicitAny: false,
     listEmittedFiles: true,
@@ -25,149 +26,156 @@ export const defaultTscOptions = (): ts.CompilerOptions => ({
     resolveJsonModule: true
 });
 
-export type TsCompileOptions = ts.CompilerOptions & { useTsConfig?: boolean | string; host?: ts.CompilerHost; };
 
+export const getErrorMessageFromDiagnostics = (diagnostics: ts.Diagnostic[]): string => {
+    return diagnostics.reduce((errorMessages, diagnostic) => {
 
-function loadTsConfig(tsconfigPath?: string): { path: string; config: TsConfig; } {
-    const tsConfig: { path?: string; config: TsConfig; } = tsconfig.loadSync(__dirname, tsconfigPath);
+        if (diagnostic.file && diagnostic.start) {
 
-    if (!tsConfig.path)
-        throw new Error('cannot find project with tsconfig.json');
+            const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+            const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
 
-    return tsConfig as any;
-}
-
-export class TscCompiler {
-    constructor() { }
-
-    static compile(fileNames: string[], options: TsCompileOptions = {}) {
-
-        const { useTsConfig, host } = options;
-
-
-        const getCompilerOptions = (): ts.CompilerOptions => {
-            if (useTsConfig) {
-                const tsconfigPath = typeof useTsConfig === 'string' ? useTsConfig : undefined;
-
-                return assignRecursive(
-                    {},
-                    loadTsConfig(tsconfigPath).config.compilerOptions,
-                    options,
-                    new AssignOptions({ arrayMode: 'replace' })
-                );
-            }
-
-            return assignRecursive(defaultTscOptions(), options);
-        };
-
-        const compilerOptions = getCompilerOptions();
-
-        /* if (!compilerOptions.outDir) {
-            const { path: tsconfigPath, config } = loadTsConfig();
-            const projectDir = path.dirname(tsconfigPath);
-
-            assignRecursive(compilerOptions, {
-                outDir: path.join(projectDir, 'dist'),
-                baseUrl: path.join(projectDir, config.compilerOptions.baseUrl),
-                paths: config.compilerOptions.paths
-            });
-        } */
-        /* debugger;
-        const host = createCompilerHost(compilerOptions, {}); */
-        // const host = createCompilerHost(compilerOptions, {});
-        const program = ts.createProgram(fileNames, compilerOptions, host);
-
-        const emitResult = program.emit();
-        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-
-        if (allDiagnostics !== undefined && allDiagnostics.length > 0) {
-
-            const errorMessages = allDiagnostics.reduce((errorMessages, diagnostic) => {
-
-                if (diagnostic.file) {
-
-                    const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-                    const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-
-                    return `${errorMessages}${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}\n`;
-                }
-
-                return `${errorMessages}${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}\n`;
-
-            }, '');
-
-
-            throw new Error(errorMessages);
+            return `${errorMessages}${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}\n`;
         }
 
-        const exitCode = emitResult.emitSkipped ? 1 : 0;
-        return { emittedFiles: emitResult.emittedFiles, outDir: compilerOptions.outDir, exitCode };
-        // console.log(`Process exiting with code '${exitCode}'.`);
-        // process.exit(exitCode);
+        return `${errorMessages}${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}\n`;
+
+    }, '');
+};
+
+
+export type TsCompileOptions = ts.CompilerOptions & { useTsConfig?: boolean | string; host?: ts.CompilerHost; };
+
+// type LoadTsConfigResult = { path?: string; config: ts.ParsedCommandLine; };
+
+const loadTsConfig = (
+    // eslint-disable-next-line default-param-last
+    tsconfigPath: string = 'tsconfig.json',
+    host?: Partial<Pick<ts.ParseConfigHost, 'readFile' | 'fileExists' | 'readDirectory'>>
+): ts.ParsedCommandLine => {
+
+    const jsonTsConfigFile = ts.readConfigFile(
+        tsconfigPath,
+        host?.readFile || ts.sys.readFile
+    );
+
+    if (jsonTsConfigFile.error)
+        throw new Error(getErrorMessageFromDiagnostics([ jsonTsConfigFile.error ]));
+
+
+    const currentFolder: string = path.dirname(tsconfigPath);
+
+    const parsedTsconfig = ts.parseJsonConfigFileContent(
+        jsonTsConfigFile.config /* json to be parsed */,
+        {
+            fileExists: host?.fileExists || ts.sys.fileExists,
+            readFile: host?.readFile || ts.sys.readFile,
+            readDirectory: host?.readDirectory || ts.sys.readDirectory,
+            useCaseSensitiveFileNames: true
+        },
+        currentFolder,
+        /* existingOptions */ undefined,
+        tsconfigPath
+    );
+
+    if (parsedTsconfig.errors?.length > 0)
+        throw new Error(getErrorMessageFromDiagnostics(parsedTsconfig.errors));
+
+    return parsedTsconfig;
+};
+
+
+const getParsedCompilerOptions = (options: TsCompileOptions = {}): ts.ParsedCommandLine[ 'options' ] => {
+    const { useTsConfig, host } = options;
+
+    if (useTsConfig) {
+        const tsconfigPath = typeof useTsConfig === 'string' ? useTsConfig : undefined;
+
+        return assignRecursive(
+            {},
+            loadTsConfig(tsconfigPath, host).options,
+            options,
+            new AssignOptions({ arrayMode: 'replace' })
+        );
     }
 
-    static compileModuleFromString(source: string, options?: ts.CompilerOptions & { useTsconfig?: boolean; }) {
+    return assignRecursive(defaultTscOptions(), options);
+};
 
-        const getCompilerOptions = (): ts.CompilerOptions => {
+export const compile = (fileNames: string[], options: TsCompileOptions = {}) => {
 
-            if (options?.useTsconfig) {
-                const tsConfig: { path?: string; config: TsConfig; } = tsconfig.loadSync(__dirname);
+    const parsedCompilerOptions = getParsedCompilerOptions(options);
 
-                if (!tsConfig.path)
-                    throw new Error('cannot find project with tsconfig.json');
+    /* if (!compilerOptions.outDir) {
+        const { path: tsconfigPath, config } = loadTsConfig();
+        const projectDir = path.dirname(tsconfigPath);
 
-                return tsConfig.config.compilerOptions;
-            }
-
-            return options || {
-                noEmitOnError: true, noImplicitAny: true,
-                target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.CommonJS,
-            };
-        };
-
-
-        const result = ts.transpileModule(source, { compilerOptions: getCompilerOptions() });
-        return result;
-    }
-
-
-    static compileAndEmit(filepath: string, options: ts.CompilerOptions) {
-
-        const compilerOptions = assignRecursive(defaultTscOptions(), options);
-
-        const { emittedFiles } = TscCompiler.compile([ filepath ], compilerOptions);
-        // emittedFiles is all emitted file, but we want only filepath file to be required
-
-        const stem = (file: string) => {
-            const rel = file.replace(/^\.\//, '');
-            return rel.replace(/\..*$/, '');
-        };
-
-        const isAbs = path.isAbsolute(filepath);
-
-        const compiledFile = emittedFiles.find(file => {
-            if (!isAbs)
-                return stem(path.relative(options.outDir, file)) === stem(filepath);
-
-            return stem(filepath).endsWith(stem(path.relative(options.outDir, file)));
+        assignRecursive(compilerOptions, {
+            outDir: path.join(projectDir, 'dist'),
+            baseUrl: path.join(projectDir, config.compilerOptions.baseUrl),
+            paths: config.compilerOptions.paths
         });
+    } */
+    /* debugger;
+    const host = createCompilerHost(compilerOptions, {}); */
+    // const host = createCompilerHost(compilerOptions, {});
+    const program = ts.createProgram({
+        rootNames: fileNames,
+        options: parsedCompilerOptions,
+        host: options.host
+    });
 
+    const emitResult = program.emit();
+    const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
 
-        return { emittedFiles, compiledFile };
+    if (allDiagnostics?.length > 0) {
+        throw new Error(getErrorMessageFromDiagnostics(allDiagnostics));
     }
 
-    static compileAndLoadModule(filepath: string, options?: ts.CompilerOptions & { outDir: ts.CompilerOptions[ 'outDir' ]; deleteOutDir?: boolean; }) {
-        const { compiledFile } = TscCompiler.compileAndEmit(filepath, options);
-        const requiredModule = require(compiledFile);
+    const exitCode = emitResult.emitSkipped ? 1 : 0;
+    return { emittedFiles: emitResult.emittedFiles, exitCode };
+    // console.log(`Process exiting with code '${exitCode}'.`);
+    // process.exit(exitCode);
+};
 
-        const opts = { deleteOutDir: true, ...options };
+export const compileModuleFromString = (source: string, options?: TsCompileOptions) => {
+    return ts.transpileModule(source, { compilerOptions: getParsedCompilerOptions(options) });
+};
 
-        if (opts.deleteOutDir)
-            fs.removeSync(options.outDir);
 
-        return { module: requiredModule, filepath: compiledFile };
-    }
-}
+export const compileAndEmit = (filepath: string, options: ts.CompilerOptions = {}) => {
+    const outDir = options.outDir || createTmpDir.sync();
+
+    const { emittedFiles } = compile([ filepath ], options);
+    // emittedFiles is all emitted file, but we want only filepath file to be required
+
+    const stem = (file: string) => {
+        const rel = file.replace(/^\.\//, '');
+        return rel.replace(/\..*$/, '');
+    };
+
+    const isAbs = path.isAbsolute(filepath);
+
+    const jsCompiledFile = emittedFiles?.find(file => {
+        if (!isAbs)
+            return stem(path.relative(outDir, file)) === stem(filepath);
+
+        return stem(filepath).endsWith(stem(path.relative(outDir, file)));
+    });
+
+
+    return { emittedFiles, jsCompiledFile, outDir };
+};
+
+export const compileAndLoadModule = <Module = any>(filepath: string, options: ts.CompilerOptions & { deleteOutDirAfterCompilation?: boolean; } = {}) => {
+    const { jsCompiledFile, outDir } = compileAndEmit(filepath, options);
+    const requiredModule = jsCompiledFile ? require(jsCompiledFile) as Module : undefined;
+
+    if (options?.deleteOutDirAfterCompilation || !options.outDir)
+        fs.removeSync(outDir);
+
+    return { module: requiredModule, filepath: jsCompiledFile };
+};
 
 
 

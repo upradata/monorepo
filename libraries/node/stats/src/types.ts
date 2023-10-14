@@ -1,12 +1,12 @@
-import type { KebabCase, ObjectOf } from '@upradata/util';
 import type { TableConfig, TableRow, TableRows } from '@upradata/terminal';
-import type  { Stat } from './stat';
+import type { KebabCase, ObjectOf } from '@upradata/util';
+import type { Stat } from './stat';
 
 
 export type Statistics<S extends Stat> = ObjectOf<S | Statistics<S>>;
 
 
-//////////////////////////////////////////
+/** //////////////////////////////////////// */
 
 
 export type StatTable = { headers: string[]; rows: TableRows; };
@@ -21,23 +21,13 @@ export type OutputStats = {
 };
 
 
-///////////////////////////////////////////
-
+/** //////////////////////////////////////// */
 
 
 export type SortType = 'stats' | 'collections' | 'global-rows';
 export type SortData<T extends SortType> = T extends 'stats' ? StatTableWithName : T extends 'collections' ? StatCollection : TableRow;
 
 export type StatSorter<T extends SortType> = (datas: SortData<T>[]) => SortData<T>[];
-
-type Comparator = (s1: string, s2: string) => number;
-
-const sort = (comparator: Comparator) => <T extends SortType>(type: T) => (datas: SortData<T>[]): SortData<T>[] => {
-    // default sorting is the alphanumeric order of the name field depending of the "type"
-    const filedToCompare = type === 'collections' ? 'collectionName' : type === 'stats' ? 'name' : '0';
-
-    return datas.sort((s1, s2) => comparator((s1[ filedToCompare ] as string), s2[ filedToCompare ]));
-};
 
 
 export type StatSorters<T> = {
@@ -46,30 +36,17 @@ export type StatSorters<T> = {
 };
 
 
-const sortComparators: StatSorters<Comparator> = {
-    alphaNumeric: (s1: string, s2: string) => s1.localeCompare(s2),
-    antiAlphaNumeric: (s1: string, s2: string) => s1.localeCompare(s2)
-};
-
-
-export const statSorters: StatSorters<<T extends SortType>(type: T) => StatSorter<T>>= {
-    alphaNumeric: sort(sortComparators.alphaNumeric),
-    antiAlphaNumeric: sort(sortComparators.antiAlphaNumeric)
-};
-
-
 export type StatSorterTypes = KebabCase<keyof StatSorters<any>>;
 
 
 
 
-//////////////////////////////////////////
-
+/** //////////////////////////////////////// */
 
 export interface StatsToStringOptions {
     rowWidth?: number;
     maxCellWidth?: number;
-    columnToShrink?:number
+    columnToShrink?: number;
     tableConfig?: TableConfig;
     sort?: {
         stats?: StatSorterTypes | StatSorter<'stats'>;

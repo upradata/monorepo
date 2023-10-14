@@ -14,6 +14,7 @@ export class StatFiles implements Stat {
     fails: StatFail[] = [];
     successes: string[] = [];
 
+    // eslint-disable-next-line no-empty-function
     constructor(public name: string) { }
 
     addBeforeCache(...files: string[]) {
@@ -50,6 +51,7 @@ export class StatFiles implements Stat {
             },
             success: {
                 data: this.successes.map((file, i) => [ i === 0 ? collectionName : '', file ]),
+                // eslint-disable-next-line prefer-template
                 headers: [ green`success` + ' (name)', green`file` ]
             },
             fails: {

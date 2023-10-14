@@ -1,23 +1,25 @@
-import { CamelCase, camelize } from '@upradata/util';
 import { styles as s } from '@upradata/template-string-style';
 import { Terminal } from '@upradata/terminal';
+import { CamelCase, camelize, isNumber } from '@upradata/util';
 import { Stat, StatCtor, StatData } from './stat';
-import {
+
+import type {
     OutputStats,
     SortData,
     SortType,
     StatCollection,
     Statistics,
     StatSorter,
-    statSorters,
     StatsToStringOptions,
     StatTableWithName
 } from './types';
+import { statSorters } from './util';
 
 
 export class Stats<S extends Stat> {
     stats: Statistics<S> = {};
 
+    // eslint-disable-next-line no-empty-function
     constructor(public statsName: string, public StatClass: StatCtor<S>) { }
 
     private isStat(s: any): s is S {
@@ -90,7 +92,7 @@ export class Stats<S extends Stat> {
             }
         };
 
-        const mergeNames = (name1: string, name2: string) => name1 === '' ? name2 : name1 + '.' + name2;
+        const mergeNames = (name1: string, name2: string) => name1 === '' ? name2 : `${name1}.${name2}`;
 
         const buildData = (parentName: string, stats: Statistics<S>) => {
             for (const [ name, stat ] of Object.entries(stats)) {
@@ -129,7 +131,7 @@ export class Stats<S extends Stat> {
             maxWidth: {
                 row: {
                     width: rowWidth,
-                    indexToShrink: columnToShrink > 0 ? columnToShrink - 1 : undefined
+                    indexToShrink: isNumber(columnToShrink) && columnToShrink > 0 ? columnToShrink - 1 : undefined
                 },
                 cell: maxCellWidth
             }
@@ -149,7 +151,7 @@ export class Stats<S extends Stat> {
         const title = terminal.title(`"${this.statsName}" summary`, { type: 'band', style: s.white.bgMagenta.transform });
 
         const sort = <T extends SortType>(datas: SortData<T>[], type: T): SortData<T>[] => {
-            const sorter = options.sort?.[ camelize(type) ] as StatsToStringOptions[ 'sort' ][ CamelCase<T> ];
+            const sorter = options.sort?.[ camelize(type) ] as Exclude<StatsToStringOptions[ 'sort' ], undefined>[ CamelCase<T> ];
 
             if (!sorter)
                 return datas;

@@ -1,6 +1,8 @@
-import { TT$ } from '@upradata/util';
+/* eslint-disable no-redeclare */
 import fs from 'fs-extra';
 import path from 'node:path';
+
+import type { TT$ } from '@upradata/util';
 
 
 export interface ForEachFilesOptions {

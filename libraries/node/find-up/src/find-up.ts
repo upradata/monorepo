@@ -34,7 +34,7 @@ const findFromMatcher = <M extends SyncAsyncMode>(matcher: Matcher<M>, directory
 
 
 export type FindFirstArgs<M extends SyncAsyncMode> = {
-    options: FindFirstPathOpts;
+    options: FindFirstPathOpts & Required<Pick<FindFirstPathOpts, 'directory'>>;
     namesOrMatcher: string[] | Matcher<M>;
 };
 
@@ -66,7 +66,7 @@ const _findUp = <Mode extends SyncAsyncMode>(mode: Mode) => (nameOrMatcher: Name
     const { root } = path.parse(startDirectory);
     const namesOrMatcher = typeof nameOrMatcher === 'function' ? nameOrMatcher : ensureArray(nameOrMatcher);
 
-    const findPath = (options: FindFirstPathOpts) => {
+    const findPath = (options: FindFirstArgs<Mode>[ 'options' ]) => {
         return findFirst(mode)({ namesOrMatcher, options });
     };
 

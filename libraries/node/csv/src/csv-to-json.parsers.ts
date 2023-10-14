@@ -14,9 +14,10 @@ import {
 } from '@upradata/util';
 import { TransformOptions } from 'stream';
 import { csvToJson, CsvToJsonOpts } from './csv-json';
+// import { CellParser, ColumnParam } from 'csvtojson/v2/Parameters';
 
-
-export type Parser<D = string, N = unknown> = (data: D, key: string, resultRow, row: string[], index: number) => N;
+// type CellParser = (item: string, head: string, resultRow: any, row: string[], columnIndex: number) => any
+export type Parser<D = string, N = unknown> = (data: D, key: string, resultRow: any, row: string[], index: number) => N;
 
 export type ParserOptions<E = unknown> = {
     emptyCell?: E;
@@ -112,7 +113,7 @@ export const cellParsers = {
         const parsersFn = parsers.filter(p => typeof p === 'function') as Parser<unknown, N>[];
         const [ cellData, ...rest ] = args;
 
-        const tryParsers = (index = 0): N => {
+        const tryParsers = (index = 0): N | undefined => {
             if (index > parsersFn.length - 1)
                 return undefined;
 
@@ -120,7 +121,7 @@ export const cellParsers = {
                 const result = parsersFn[ index ](cellData, ...rest);
                 if (!isNil(result))
                     return result;
-            } catch { }
+            } catch { /* empty */ }
 
             return tryParsers(index + 1);
         };
@@ -180,6 +181,7 @@ export const regexParsers = {
     )
 };
 
+export const cellDataParser = (parser: Parser<string, unknown>, emptyCell: any) => cellParsers.compose(parser, cellParsers.setEmptyCell(emptyCell));
 
 export const autoParser = (emptyCell: any = undefined) => (cellData: string) => {
     const parser = ifThen()
@@ -193,7 +195,6 @@ export const autoParser = (emptyCell: any = undefined) => (cellData: string) => 
     return cellDataParser(parser, emptyCell);
 };
 
-export const cellDataParser = (parser: Parser<string, unknown>, emptyCell: any) => cellParsers.compose(parser, cellParsers.setEmptyCell(emptyCell));
 
 export const getParsers = <O extends { default?: string; }, Headers extends string = DefaultHeaders<O>>(
     headers: readonly Headers[] = [], defaultParserOptions: ParsersOptions<O> = {}, parsersOptions: ParsersOpts<O> = {}
@@ -212,13 +213,13 @@ export const getParsers = <O extends { default?: string; }, Headers extends stri
         const emptyCell = ifThen()
             .next({ if: isUndefined(option), then: defaultParser.emptyCell })
             .next({ if: isDefault(option), then: defaultParser.emptyCell, next: parsersOptions as ParserOptions })
-            .next(option => ({ if: isDefinedProp(option, 'emptyCell'), then: option.emptyCell, else: defaultParser.emptyCell }))
+            .next(option => ({ if: option && isDefinedProp(option, 'emptyCell'), then: option!.emptyCell, else: defaultParser.emptyCell }))
             .value;
 
         const parser = ifThen()
             .next({ if: isUndefined(option), then: defaultParser.parser })
             .next({ if: isDefault(option), then: defaultParser.parser, next: parsersOptions as ParserOptions })
-            .next(option => ({ if: isDefinedProp(option, 'parser'), then: option.parser, else: defaultParser.parser }))
+            .next(option => ({ if: option && isDefinedProp(option, 'parser'), then: option!.parser, else: defaultParser.parser }))
             .value;
 
         return { name, parser: cellDataParser(parser, emptyCell) };
@@ -239,7 +240,7 @@ export const csvToJsonWithDefaultParsers = <O extends { default?: string; }>(def
     ): Promise<R[]> => {
 
         return csvToJson<R>(file, {
-            colParser: getParsers(csvOptions.headers, defaultParserOptions, options.parsers),
+            colParser: getParsers(csvOptions?.headers, defaultParserOptions, options.parsers) as Record<string, Parser>,
             ...csvOptions
         }, options.stream);
     };

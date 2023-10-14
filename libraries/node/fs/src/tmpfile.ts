@@ -3,13 +3,10 @@ import { stripIndents, TT$ } from '@upradata/util';
 import fs from 'fs-extra';
 import os from 'node:os';
 import path from 'node:path';
-import { promisify } from 'node:util';
 
 
-const existsFile = promisify(fs.exists);
-
-const getFile = (mode: keyof SyncAsync, option: TmpFileOption = {}): TT$<string> => {
-    const { tmpDirRoot = os.tmpdir(), prefix = '' } = option;
+const createTmpFileName = (mode: keyof SyncAsync, option: TmpFileOption = {}): TT$<string> => {
+    const { tmpDirRoot = os.tmpdir(), prefix = '', maxAttempt = 10 } = option;
 
     const get = (i: number = 0) => {
 
@@ -17,9 +14,9 @@ const getFile = (mode: keyof SyncAsync, option: TmpFileOption = {}): TT$<string>
             if (!exist)
                 return name;
 
-            if (i > 10) {
+            if (i > maxAttempt) {
                 throw new Error(stripIndents`Could not create a temporary file in ${tmpDirRoot}:
-                                 10 attemps have been tried out and each time the random filename exists`);
+                                 ${maxAttempt} attemps have been tried out and each time the random filename exists`);
             }
 
             return get(i + 1);
@@ -28,7 +25,7 @@ const getFile = (mode: keyof SyncAsync, option: TmpFileOption = {}): TT$<string>
         const id = guid().slice(0, 6);
 
         const name = path.join(tmpDirRoot, `${prefix}${id}`);
-        return mode === 'sync' ? tmpFile(name, fs.existsSync(name)) : existsFile(name).then(exist => tmpFile(name, exist));
+        return mode === 'sync' ? tmpFile(name, fs.existsSync(name)) : fs.exists(name).then(exist => tmpFile(name, exist));
     };
 
     return get();
@@ -38,23 +35,24 @@ const getFile = (mode: keyof SyncAsync, option: TmpFileOption = {}): TT$<string>
 export interface TmpFileOption {
     tmpDirRoot?: string;
     prefix?: string;
+    maxAttempt?: number;
 }
 
-export const tmpFileName = {
-    sync: (option?: TmpFileOption) => getFile('sync', option) as string,
-    async: (option?: TmpFileOption) => getFile('async', option) as Promise<string>
+export const getTmpFileName = {
+    sync: (option?: TmpFileOption) => createTmpFileName('sync', option) as string,
+    async: (option?: TmpFileOption) => createTmpFileName('async', option) as Promise<string>
 };
 
 
 export const createTmpDir = {
     sync: (option?: TmpFileOption) => {
-        const dirname = tmpFileName.sync(option);
+        const dirname = getTmpFileName.sync(option);
         fs.ensureDirSync(dirname);
 
         return dirname;
     },
     async: async (option?: TmpFileOption) => {
-        const dirname = await tmpFileName.async(option);
+        const dirname = await getTmpFileName.async(option);
         await fs.ensureDir(dirname);
 
         return dirname;

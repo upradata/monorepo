@@ -18,7 +18,7 @@ const enableSkipEmptyRows = () => {
         const self = this;
 
         lines.shift = function () {
-            let line: string = '';
+            let line: string | undefined = '';
 
             while (line === '' && lines.length > 0) {
                 line = oldShift.call(lines);
@@ -29,7 +29,7 @@ const enableSkipEmptyRows = () => {
                 } else
                     delimiter = self.conv.parseRuntime.delimiter;
 
-                const isOnlyEmptyCols = line.split(delimiter).find(c => c !== '') === undefined;
+                const isOnlyEmptyCols = line?.split(delimiter).find(c => c !== '') === undefined;
 
                 if (isOnlyEmptyCols)
                     line = '';
@@ -83,7 +83,7 @@ export type JsonToCsvOptions<T> = {
 };
 
 
-export function jsonToCsv<T>(json: T[], options: JsonToCsvOptions<T> = {}): string {
+export function jsonToCsv<Row extends object>(json: Row[], options: JsonToCsvOptions<Row> = {}): string {
     const { nbKeys, delimiter = ';' } = options;
 
     const getHeaders = () => {
@@ -91,13 +91,13 @@ export function jsonToCsv<T>(json: T[], options: JsonToCsvOptions<T> = {}): stri
             return options.headers;
 
         // we are oblige to parse all the rows to be sure we have a full row to get the header keys
-        const get = (next: IteratorResult<T>, headers: PropertyKey[]) => {
+        const get = (next: IteratorResult<Row>, headers: PropertyKey[]) => {
             const { value, done } = next;
 
             if (done)
                 return headers;
 
-            const row = value as T;
+            const row = value as Row;
             const rowHeaders = Object.keys(row);
 
             if (nbKeys === rowHeaders.length) {
@@ -105,6 +105,7 @@ export function jsonToCsv<T>(json: T[], options: JsonToCsvOptions<T> = {}): stri
                 return rowHeaders;
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-use-before-define
             return get(it.next(), rowHeaders.length > headers.length ? rowHeaders : headers);
         };
 
@@ -139,6 +140,7 @@ export const csvHeaders = <H extends string = string>(file: string, options: { d
         .fromFile(file)
         .on('data', (line: {}) => {
             headers = Object.keys(line) as H[];
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             csvStream.destroy();
             resolve(headers);
         })

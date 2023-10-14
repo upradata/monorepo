@@ -110,7 +110,7 @@ const valueIf2 = ifChained('test' as const)
  */
 
 
-type Condition<T, E> = { if?: TT$<boolean>; then: T | CallableValue<T>; else?: E | CallableValue<E>; };
-export const ifthen = <C extends Condition<any, any>>(condition: C) => {
+export type IfThenCondition<T, E> = { if?: TT$<boolean>; then: T | CallableValue<T>; else?: E | CallableValue<E>; };
+export const ifthen = <C extends IfThenCondition<any, any>>(condition: C) => {
     return ifThen().next(condition).value;
 };

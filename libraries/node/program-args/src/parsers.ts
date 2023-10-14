@@ -1,3 +1,4 @@
+/* eslint-disable object-shorthand */
 import { requireModule, RequireOptions } from '@upradata/module';
 import {
     composeLeft,
@@ -6,24 +7,11 @@ import {
     isUndefined,
     ObjectOf,
     setRecursive,
-    stringToRegex,
-    TT
+    stringToRegex
 } from '@upradata/util';
-/* eslint-disable object-shorthand */
 import { InvalidArgumentError } from 'commander';
-import { AliasTransform, CliOption } from './cli.option';
 
-
-export { InvalidArgumentError as CliInvalidArgumentError } from 'commander';
-
-
-export type CliParserPrevious<T> = TT<T, 'mutable'>;
-
-// export type CommanderValueParser = <T>(value: string, previous?: TT<T>, aliasOriginOption?: CliOption) => T;
-export type CommanderValueParser<T> = (value: string, previous?: CliParserPrevious<T>, aliasOriginOption?: CliOption) => T;
-// export type CommanderParser = <T>(value: string, previous?: TT<T>, aliasOriginOption?: CliOption) => TT<T>;
-export type CommanderParser<T, R = CliParserPrevious<T>> = (value: string, previous?: CliParserPrevious<T>, aliasOriginOption?: CliOption) => R;
-export type CommanderReducer<T> = (value: string, previous?: T, aliasOriginOption?: CliOption) => T;
+import type { AliasTransform, CliParserPrevious, CommanderParser, CommanderReducer, CommanderValueParser, ICliOption } from './cli.option.types';
 
 
 const concat = <T>(value: T, previous: T[]) => [ ...previous, value ];
@@ -35,7 +23,7 @@ export const concatIfVariadic = <T>(isVariadic: boolean, value: T, previous?: Cl
 
 
 
-const parseNumber = (type: 'int' | 'float'): CommanderParser<number> => function (this: CliOption, value, previous) {
+const parseNumber = (type: 'int' | 'float'): CommanderParser<number> => function (this: ICliOption, value, previous) {
     // parseInt takes a string and a radix
     const parsedValue = type === 'int' ? parseInt(value, 10) : parseFloat(value);
 
@@ -49,12 +37,12 @@ const parseNumber = (type: 'int' | 'float'): CommanderParser<number> => function
 
 const reduce = <R, V = string>(
     init: R, reducer: (container: R, value: V) => R, parser?: CommanderValueParser<V>
-): CommanderReducer<R> => function (this: CliOption, value, previous, aliasOriginOption) {
+): CommanderReducer<R> => function (this: ICliOption, value, previous, aliasOriginOption) {
 
     // if this.isValueFromDefault ==> option value was initially set with the option.defaultValue at creation
-    const container = previous || (this.isValueFromDefault ? previous : init);
+    const container = previous || (this.isValueFromDefault ? previous as R : init);
 
-    return reducer(container, (parser?.call(this, value, undefined, aliasOriginOption) ?? value));
+    return reducer(container, (parser?.call(this, value, undefined, aliasOriginOption) ?? value as V));
 };
 
 
@@ -64,11 +52,11 @@ export const parsers = {
     int: parseNumber('int'),
     float: parseNumber('float'),
 
-    string: function (this: CliOption, value, previous) {
+    string: function (this: ICliOption, value, previous) {
         return concatIfVariadic(this?.variadic, value, previous);
     } as CommanderParser<string>,
 
-    boolean: function (this: CliOption, value: string, previous: CliParserPrevious<boolean>) {
+    boolean: function (this: ICliOption, value: string, previous: CliParserPrevious<boolean>) {
         // when it is a boolean type option, like command --enable, there is no value
 
         const v = isNil(value) ?
@@ -108,7 +96,7 @@ export const parsers = {
         });
     },
 
-    object: (key?: string) => function (this: CliOption, value, previous) {
+    object: (key?: string) => function (this: ICliOption, value, previous) {
         let v: any = undefined;
 
         try {
@@ -124,7 +112,7 @@ export const parsers = {
 
     } as CommanderParser<ObjectOf<any>>,
 
-    cumulateObject: function <T extends object>(this: CliOption, value: string, previous: CliParserPrevious<T>) {
+    cumulateObject: function <T extends object>(this: ICliOption, value: string, previous: CliParserPrevious<T>) {
         const o = JSON.parse(value);
 
         const trySetLastValue = () => {
@@ -151,7 +139,7 @@ export const parsers = {
     choices: <T = string>(choices: readonly T[], parser?: CommanderValueParser<T>): CommanderParser<T> => {
         const parsedChoices = (parser ? choices.map(c => typeof c === 'string' ? parser(c) : c) : choices) as T[];
 
-        return function (this: CliOption, value, previous) {
+        return function (this: ICliOption, value, previous) {
             const parsedValue = parser?.(value, previous) ?? value as unknown as T;
 
             if (!parsedChoices.includes(parsedValue))
@@ -161,7 +149,7 @@ export const parsers = {
         };
     },
 
-    regex: function (this: CliOption, value: string, previous: CliParserPrevious<RegExp>) {
+    regex: function (this: ICliOption, value: string, previous: CliParserPrevious<RegExp>) {
         const getRegex = () => {
             const res = value.match(/\/(.*)\/(.*)/);
 
@@ -179,16 +167,16 @@ export const parsers = {
         return concatIfVariadic(this?.variadic, regex, previous);
     } as CommanderParser<RegExp>,
 
-    require: <T = any>(options: RequireOptions): CommanderParser<T> => function (this: CliOption, value, previous) {
+    require: <T = any>(options: RequireOptions): CommanderParser<T> => function (this: ICliOption, value, previous) {
         return concatIfVariadic(this?.variadic, requireModule(value, options), previous);
     },
 
-    compose: <T = any, R = T>(...parsers: CommanderValueParser<any>[]): CommanderParser<T, R> => function (this: CliOption, value, previous, aliasOriginOption) {
+    compose: <T = any, R = T>(...parsers: CommanderValueParser<any>[]): CommanderParser<T, R> => function (this: ICliOption, value, previous, aliasOriginOption) {
         const parsedValue = composeLeft(parsers.map(p => (v: string) => p.call(this, v, previous, aliasOriginOption)), value);
         return concatIfVariadic(this?.variadic, parsedValue, previous);
     },
 
-    try: <T>(parser: CommanderParser<T>) => function (this: CliOption, value: string, previous: CliParserPrevious<T>) {
+    try: <T>(parser: CommanderParser<T>) => function (this: ICliOption, value: string, previous: CliParserPrevious<T>) {
         try {
             return parser.call(this, value, previous);
         } catch (e) {

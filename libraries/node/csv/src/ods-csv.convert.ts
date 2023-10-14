@@ -71,14 +71,14 @@ const convert = async (filepath: string, options: Partial<OdsConvertOptions> & {
                 `;
 
 
-    if (isExecLog(execOptions.logOutput, 'stdout')) {
+    if (execOptions.logOutput && isExecLog(execOptions.logOutput, 'stdout')) {
         console.log(yellow`Converting ${filepath} to ${conversionType === 'csv->ods' ? 'ods' : 'csv'}`);
     }
 
     // unoconv is SOOOO good that only one process at a time can be executed. So we do it synchronously
     await execAsync(command, execOptions);
 
-    if (isExecLog(execOptions.logOutput, 'stdout'))
+    if (execOptions.logOutput && isExecLog(execOptions.logOutput, 'stdout'))
         console.log(green`${outputFile} generated\n`);
 
     return outputFile;
@@ -86,7 +86,7 @@ const convert = async (filepath: string, options: Partial<OdsConvertOptions> & {
 
 
 export const odsToCsv = async (odsFile: string, options?: Partial<OdsConvertOptions>) => {
-    if (options.sheetName) {
+    if (options?.sheetName) {
         const xlsxFile = await odsToXlsx(odsFile, options);
         return xlsxToCsv(xlsxFile, options as XslxToCsvOption);
     }

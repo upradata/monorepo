@@ -13,7 +13,7 @@ export const createCompilerHost = (options: ts.CompilerOptions, extraOptions: { 
 
     return {
         getSourceFile,
-        getDefaultLibFileName: () => "lib.d.ts",
+        getDefaultLibFileName: () => 'lib.d.ts',
         writeFile: (fileName, content) => ts.sys.writeFile(fileName, content),
         getCurrentDirectory: () => ts.sys.getCurrentDirectory(),
         getDirectories: path => ts.sys.getDirectories(path),
@@ -35,7 +35,7 @@ export const createCompilerHost = (options: ts.CompilerOptions, extraOptions: { 
         return ts.sys.readFile(fileName);
     }
 
-    function getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void) {
+    function getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, _onError?: (message: string) => void) {
         const sourceText = readFile(fileName);
         return sourceText !== undefined ? ts.createSourceFile(fileName, sourceText, languageVersion) : undefined;
     }
@@ -59,7 +59,7 @@ export const createCompilerHost = (options: ts.CompilerOptions, extraOptions: { 
                     if (fileExists(modulePath)) {
                         resolvedModules.push({ resolvedFileName: modulePath });
                     }
-                    const result = ts.resolveModuleName(moduleName, containingFile, options, { fileExists, readFile });
+                    // const result = ts.resolveModuleName(moduleName, containingFile, options, { fileExists, readFile });
                 }
 
                 /* for (const location of moduleSearchLocations) {

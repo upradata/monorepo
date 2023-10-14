@@ -4,19 +4,19 @@ import ts from 'typescript';
 import { defaultTscOptions } from './tsc';
 
 
-function getExternalModuleName(node: ts.Node): ts.Expression {
+function getExternalModuleName(node: ts.Node): ts.Expression | undefined {
     if (node.kind === ts.SyntaxKind.ImportDeclaration) {
-        return (<ts.ImportDeclaration>node).moduleSpecifier;
+        return (node as ts.ImportDeclaration).moduleSpecifier;
     }
     if (node.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
-        const reference = (<ts.ImportEqualsDeclaration>node).moduleReference;
+        const reference = (node as ts.ImportEqualsDeclaration).moduleReference;
         if (reference.kind === ts.SyntaxKind.ExternalModuleReference) {
-            return (<ts.ExternalModuleReference>reference).expression;
+            return (reference as ts.ExternalModuleReference).expression;
         }
     }
 
     if (node.kind === ts.SyntaxKind.ExportDeclaration) {
-        return (<ts.ExportDeclaration>node).moduleSpecifier;
+        return (node as ts.ExportDeclaration).moduleSpecifier;
     }
 }
 
@@ -56,12 +56,12 @@ function getSourceDependencies(sourceFile: ts.SourceFile, checker: ts.TypeChecke
 }
 
 export const getDependencies = (sourceFiles: string[], options?: { compiler?: ts.CompilerOptions; filter?: (filepath: string) => boolean; }) => {
-    const opts = assignRecursive({ filter: (file: string) => true, compiler: { ...defaultTscOptions, emitDeclarationOnly: true } }, options);
+    const opts = assignRecursive({ filter: (_file: string) => true, compiler: { ...defaultTscOptions, emitDeclarationOnly: true } }, options);
     const deps: string[] = [];
 
-    const program = ts.createProgram(sourceFiles, opts.compiler);
+    const program = ts.createProgram(sourceFiles, opts.compiler!);
 
-    const sources = program.getSourceFiles().filter(s => opts.filter(s.fileName));
+    const sources = program.getSourceFiles().filter(s => opts.filter!(s.fileName));
 
     for (const sourceFile of sources) {
         const depSymbols = getSourceDependencies(sourceFile, program.getTypeChecker());
@@ -69,7 +69,7 @@ export const getDependencies = (sourceFiles: string[], options?: { compiler?: ts
         for (const importSymbol of depSymbols) {
             // Now that you have a symbol, get the declaration to find out which
             // source file it is comming from.
-            const declaration = importSymbol.getDeclarations()[ 0 ];
+            const declaration = importSymbol.getDeclarations()![ 0 ];
 
             // This might be helpful if you are doing bundelling, you would want to
             // know if this comming from a .d.ts e.g. `declare module "typescript`
@@ -80,7 +80,7 @@ export const getDependencies = (sourceFiles: string[], options?: { compiler?: ts
             const filepathJsAndTs = [ 'js', 'ts' ].map(ext => `${stem}.${ext}`);
 
             for (const file of filepathJsAndTs) {
-                if (opts.filter(filepath) && fs.existsSync(file))
+                if (opts.filter!(filepath) && fs.existsSync(file))
                     deps.push(file);
             }
             // console.log(`   --> ${declaration.getSourceFile().fileName}  (isCodeModule = ${isCodeModule})`);

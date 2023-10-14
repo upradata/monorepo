@@ -1,3 +1,4 @@
+/* eslint-disable prefer-template */
 import { Argument, Command, Help } from 'commander';
 import { PartialRecursive, assignRecursive } from '@upradata/util';
 import { StyleTransformString, styles as s } from '@upradata/template-string-style';

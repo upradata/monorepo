@@ -1,22 +1,18 @@
 import fs from 'fs-extra';
-import { TscCompiler } from './tsc';
+import { compileAndLoadModule } from './tsc';
 
 
-export const requireAndCompileIfNecesseray = (filenameNoExt: string) => {
+export const requireAndCompileIfNecesseray = <Module = any>(filenameNoExt: string) => {
     const jsFile = `${filenameNoExt}.js`;
 
     if (fs.existsSync(jsFile))
-        return require(jsFile);
+        return require(jsFile) as Module;
 
     const tsFile = `${filenameNoExt}.ts`;
 
     if (fs.existsSync(tsFile)) {
         // const fileContent = fs.readFileSync(file, 'utf8');
-        const { emittedFiles, outDir } = TscCompiler.compile([ tsFile ]);
-        const required = require(emittedFiles[ 0 ]); // path.join(outTmpDir, path.basename(filenameNoExt) + '.js')
-        fs.removeSync(outDir);
-
-        return required;
+        return compileAndLoadModule<Module>(tsFile, { deleteOutDirAfterCompilation: true }).module;
     }
 
     /*   for (const ext of extensions) {

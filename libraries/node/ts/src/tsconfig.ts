@@ -17,19 +17,6 @@ interface TsConfigData {
     config: TsConfig;
 }
 
-export function getTsConfigJson(directory: string = process.cwd(), tsconfigFile: string = 'tsconfig.json'): MergedTsConfigData {
-
-    const tsconfigDir = findUpDir.sync(tsconfigFile, { from: directory });
-
-    const tsConfig: TsConfigData = tsconfig.loadSync(tsconfigDir, tsconfigFile);
-
-    if (!tsConfig.path)
-        throw new Error(`Cannot find tsconfig file "${path.join(directory, tsconfigFile)}"`);
-
-    return mergeExtendedTsconfigJson(tsConfig.config, [ tsConfig.path ]);
-}
-
-
 
 const mergeExtendedTsconfigJson = (tsConfig: TsConfig, tsConfigFiles: string[]): MergedTsConfigData => {
 
@@ -58,3 +45,23 @@ const mergeExtendedTsconfigJson = (tsConfig: TsConfig, tsConfigFiles: string[]):
 
     return mergedTsConfigData;
 };
+
+
+// @deprecated
+/*
+      const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
+            tsconfigPath,
+            ts.sys.readFile
+        );
+*/
+export function getTsConfigJson(directory: string = process.cwd(), tsconfigFile: string = 'tsconfig.json'): MergedTsConfigData {
+
+    const tsconfigDir = findUpDir.sync(tsconfigFile, { from: directory });
+
+    const tsConfig: TsConfigData = tsconfig.loadSync(tsconfigDir, tsconfigFile);
+
+    if (!tsConfig.path)
+        throw new Error(`Cannot find tsconfig file "${path.join(directory, tsconfigFile)}"`);
+
+    return mergeExtendedTsconfigJson(tsConfig.config, [ tsConfig.path ]);
+}

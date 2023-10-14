@@ -1,14 +1,14 @@
 /* eslint-disable no-dupe-class-members */
 import { EventEmitter } from 'events';
-import { Command, CommanderError, OptionValueSource } from 'commander';
-import { FunctionN, TT, TT$ } from '@upradata/util';
-import { CliOption, CliOptionInit } from './cli.option';
-import { CliHelper, CliHelperOpts } from './helper';
+import { CliOption } from './cli.option';
+import { CliHelper, type CliHelperOpts } from './helper';
 import { camelcase } from './util';
-import { CommanderParser } from './parsers';
+
+import type { FunctionN, TT, TT$ } from '@upradata/util';
+import { Argument, Option, Command, CommanderError, OptionValueSource } from 'commander';
+import type { CliOptionInit, CommanderParser } from './cli.option.types';
 
 
-export { InvalidArgumentError as CliInvalidArgumentError } from 'commander';
 export { Argument as CliArgument } from 'commander';
 
 
@@ -16,7 +16,6 @@ declare module 'commander' {
     interface Command extends EventEmitter {
         _allowUnknownOption: boolean;
         _allowExcessArguments: boolean;
-        /** @type {Argument[]} */
         _args: Argument[];
         _scriptPath: string;
         _name: string;
@@ -26,7 +25,7 @@ declare module 'commander' {
         _actionHandler: (processedArgs: any[]) => any;
         _executableHandler: boolean;
         _executableFile: string; // custom name for executable
-        _defaultCommandName: string;
+        _defaultCommandName: string | null;
         _exitCallback: (error: CommanderError) => void;
         _aliases: string[];
         _combineFlagAndOptionalValue: boolean;
@@ -94,7 +93,7 @@ export class CliCommand extends Command {
 
         const createCliOption = () => {
             if (typeof args[ 0 ] === 'string') {
-                const options: CliOptionInit<any> = {
+                const options: CliOptionInit<any, CliOption> = {
                     flags: args[ 0 ],
                     description: args[ 1 ],
                     defaultValue: typeof args[ 2 ] === 'function' ? args[ 3 ] : args[ 2 ],
@@ -104,7 +103,7 @@ export class CliCommand extends Command {
                 return new CliOption(options);
             }
 
-            const { aliases = [], ...rest } = args[ 0 ] as CliOptionInit<any>;
+            const { aliases = [], ...rest } = args[ 0 ] as CliOptionInit<any, CliOption>;
 
             const newOption = new CliOption(rest);
             newOption.addAliases(...aliases);
@@ -141,8 +140,8 @@ export class CliCommand extends Command {
             if (option.negate || option.optional || option.required || typeof defaultValue === 'boolean') {
                 // when --no-foo we make sure default is true, unless a --foo option is already defined
                 if (option.negate && !option.negateNoDefault) {
-                    const positiveLongFlag = option.long.replace(/^--no-/, '--');
-                    defaultValue = this._findOption(positiveLongFlag) ? this.getOptionValue(name) : true;
+                    const positiveLongFlag = option.long?.replace(/^--no-/, '--');
+                    defaultValue = positiveLongFlag && this._findOption(positiveLongFlag) ? this.getOptionValue(name) : true;
                 }
 
                 // preassign only if we have a default
@@ -210,7 +209,7 @@ export class CliCommand extends Command {
                 handleOptionValue(option, value, invalidValueMessage(value), source);
 
                 for (const a of [ ...aliases ].filter(a => a.type === 'target'))
-                    handleOptionValue(a.option, a.transform(value), invalidValueMessage(value), source);
+                    handleOptionValue(a.option as CliOption, a.transform(value), invalidValueMessage(value), source);
             };
         };
 
