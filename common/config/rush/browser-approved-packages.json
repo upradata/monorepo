@@ -83,6 +83,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@upradata/csv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@upradata/eslint-config",
       "allowedCategories": [ "libraries" ]
     },
@@ -115,11 +119,19 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@upradata/node-useful",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@upradata/node-util",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@upradata/object",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/program-args",
       "allowedCategories": [ "libraries" ]
     },
     {

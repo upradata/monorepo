@@ -9,6 +9,7 @@ type LogOutput = {
     stderr?: boolean;
 };
 
+// eslint-disable-next-line no-undef
 export type ExecAsyncOptions = { encoding?: 'buffer' | BufferEncoding | null; } & ExecOptions & {
     logOutput?: boolean | LogOutput;
     emitError?: boolean;

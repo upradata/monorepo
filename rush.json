@@ -415,8 +415,8 @@
         //     "shouldPublish": true
         // },
         {
-            "packageName": "@upradata/node-util",
-            "projectFolder": "libraries/node/node-util",
+            "packageName": "@upradata/node-useful",
+            "projectFolder": "libraries/node/useful",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },
@@ -483,6 +483,12 @@
         {
             "packageName": "@upradata/fs",
             "projectFolder": "libraries/node/fs",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/node-util",
+            "projectFolder": "libraries/node/util",
             "reviewCategory": "libraries",
             "shouldPublish": true
         },

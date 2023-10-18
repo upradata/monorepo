@@ -58,6 +58,7 @@
         "@types/node": "20.8.4",
         "@upradata/eslint-config": "workspace:*",
         "@upradata/heft-node-rig": "workspace:*",
+        "@upradata/types": "workspace:*",
         "eslint-config-airbnb": "^19.0.4",
         "eslint-config-prettier": "^9.0.0",
         "eslint-define-config": "~1.24.1",
@@ -68,8 +69,7 @@
         "eslint-plugin-promise": "~6.1.1",
         "eslint-plugin-react": "~7.33.2",
         "eslint-plugin-tsdoc": "~0.2.17",
-        "typescript": "~5.2.2",
-        "@upradata/types": "workspace:*"
+        "typescript": "~5.2.2"
     },
     "publishConfig": {
         "access": "public"

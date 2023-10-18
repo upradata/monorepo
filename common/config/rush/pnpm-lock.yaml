@@ -264,7 +264,7 @@ importers:
         version: link:../module
       '@upradata/node-util':
         specifier: workspace:*
-        version: link:../node-util
+        version: link:../util
       '@upradata/object':
         specifier: workspace:*
         version: link:../../universal/object
@@ -340,7 +340,7 @@ importers:
     dependencies:
       '@upradata/node-util':
         specifier: workspace:*
-        version: link:../node-util
+        version: link:../util
       '@upradata/template-string-style':
         specifier: workspace:*
         version: link:../template-string-style
@@ -410,7 +410,7 @@ importers:
     dependencies:
       '@upradata/node-util':
         specifier: workspace:*
-        version: link:../node-util
+        version: link:../util
       '@upradata/template-string':
         specifier: workspace:*
         version: link:../../universal/template-string
@@ -491,9 +491,6 @@ importers:
       '@rushstack/heft':
         specifier: 0.62.3
         version: 0.62.3(@types/node@20.8.4)
-      '@types/fs-extra':
-        specifier: ^11.0.2
-        version: 11.0.2
       '@types/node':
         specifier: 20.8.4
         version: 20.8.4
@@ -609,55 +606,6 @@ importers:
       tslib:
         specifier: ~2.6.2
         version: 2.6.2
-
-  ../../libraries/node/node-util:
-    dependencies:
-      '@upradata/useful':
-        specifier: workspace:*
-        version: link:../../universal/useful
-    devDependencies:
-      '@rushstack/heft':
-        specifier: 0.62.3
-        version: 0.62.3(@types/node@20.8.4)
-      '@types/fs-extra':
-        specifier: ^11.0.2
-        version: 11.0.2
-      '@types/heft-jest':
-        specifier: 1.0.4
-        version: 1.0.4
-      '@types/jest':
-        specifier: ^29.5.5
-        version: 29.5.5
-      '@types/node':
-        specifier: 20.8.4
-        version: 20.8.4
-      '@upradata/eslint-config':
-        specifier: workspace:*
-        version: link:../../../eslint/eslint-config
-      '@upradata/find-up':
-        specifier: workspace:*
-        version: link:../find-up
-      '@upradata/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../../rigs/heft-node-rig
-      '@upradata/stats':
-        specifier: workspace:*
-        version: link:../stats
-      '@upradata/types':
-        specifier: workspace:*
-        version: link:../../universal/types
-      fs-extra:
-        specifier: ^11.1.1
-        version: 11.1.1
-      memory-fs:
-        specifier: ~0.5.0
-        version: 0.5.0
-      tslib:
-        specifier: ~2.6.2
-        version: 2.6.2
-      typescript:
-        specifier: ~5.2.2
-        version: 5.2.2
 
   ../../libraries/node/program-args:
     dependencies:
@@ -1017,6 +965,149 @@ importers:
       tslib:
         specifier: ~2.6.2
         version: 2.6.2
+
+  ../../libraries/node/useful:
+    dependencies:
+      '@upradata/useful':
+        specifier: workspace:*
+        version: link:../../universal/useful
+    devDependencies:
+      '@rushstack/heft':
+        specifier: 0.62.3
+        version: 0.62.3(@types/node@20.8.4)
+      '@types/node':
+        specifier: 20.8.4
+        version: 20.8.4
+      '@upradata/eslint-config':
+        specifier: workspace:*
+        version: link:../../../eslint/eslint-config
+      '@upradata/heft-node-rig':
+        specifier: workspace:*
+        version: link:../../../rigs/heft-node-rig
+      eslint-config-airbnb:
+        specifier: ^19.0.4
+        version: 19.0.4(eslint-plugin-i@2.28.1)(eslint-plugin-jsx-a11y@6.7.1)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react@7.33.2)(eslint@8.51.0)
+      eslint-config-prettier:
+        specifier: ^9.0.0
+        version: 9.0.0(eslint@8.51.0)
+      eslint-define-config:
+        specifier: ~1.24.1
+        version: 1.24.1
+      eslint-import-resolver-exports:
+        specifier: 1.0.0-beta.5
+        version: 1.0.0-beta.5(eslint-plugin-i@2.28.1)(eslint@8.51.0)
+      eslint-import-resolver-typescript:
+        specifier: ~3.6.1
+        version: 3.6.1(eslint-plugin-i@2.28.1)(eslint@8.51.0)
+      eslint-plugin-import:
+        specifier: npm:eslint-plugin-i@latest
+        version: /eslint-plugin-i@2.28.1(eslint@8.51.0)
+      eslint-plugin-jsx-a11y:
+        specifier: ^6.7.1
+        version: 6.7.1(eslint@8.51.0)
+      eslint-plugin-promise:
+        specifier: ~6.1.1
+        version: 6.1.1(eslint@8.51.0)
+      eslint-plugin-react:
+        specifier: ~7.33.2
+        version: 7.33.2(eslint@8.51.0)
+      eslint-plugin-tsdoc:
+        specifier: ~0.2.17
+        version: 0.2.17
+      tslib:
+        specifier: ~2.6.2
+        version: 2.6.2
+      typescript:
+        specifier: ~5.2.2
+        version: 5.2.2
+
+  ../../libraries/node/util:
+    dependencies:
+      '@upradata/cache':
+        specifier: workspace:*
+        version: link:../cache
+      '@upradata/csv':
+        specifier: workspace:*
+        version: link:../csv
+      '@upradata/find-up':
+        specifier: workspace:*
+        version: link:../find-up
+      '@upradata/fs':
+        specifier: workspace:*
+        version: link:../fs
+      '@upradata/json':
+        specifier: workspace:*
+        version: link:../json
+      '@upradata/module':
+        specifier: workspace:*
+        version: link:../module
+      '@upradata/node-useful':
+        specifier: workspace:*
+        version: link:../useful
+      '@upradata/program-args':
+        specifier: workspace:*
+        version: link:../program-args
+      '@upradata/stats':
+        specifier: workspace:*
+        version: link:../stats
+      '@upradata/template-string-style':
+        specifier: workspace:*
+        version: link:../template-string-style
+      '@upradata/terminal':
+        specifier: workspace:*
+        version: link:../terminal
+      '@upradata/ts':
+        specifier: workspace:*
+        version: link:../ts
+    devDependencies:
+      '@rushstack/heft':
+        specifier: 0.62.3
+        version: 0.62.3(@types/node@20.8.4)
+      '@types/node':
+        specifier: 20.8.4
+        version: 20.8.4
+      '@upradata/eslint-config':
+        specifier: workspace:*
+        version: link:../../../eslint/eslint-config
+      '@upradata/heft-node-rig':
+        specifier: workspace:*
+        version: link:../../../rigs/heft-node-rig
+      eslint-config-airbnb:
+        specifier: ^19.0.4
+        version: 19.0.4(eslint-plugin-i@2.28.1)(eslint-plugin-jsx-a11y@6.7.1)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react@7.33.2)(eslint@8.51.0)
+      eslint-config-prettier:
+        specifier: ^9.0.0
+        version: 9.0.0(eslint@8.51.0)
+      eslint-define-config:
+        specifier: ~1.24.1
+        version: 1.24.1
+      eslint-import-resolver-exports:
+        specifier: 1.0.0-beta.5
+        version: 1.0.0-beta.5(eslint-plugin-i@2.28.1)(eslint@8.51.0)
+      eslint-import-resolver-typescript:
+        specifier: ~3.6.1
+        version: 3.6.1(eslint-plugin-i@2.28.1)(eslint@8.51.0)
+      eslint-plugin-import:
+        specifier: npm:eslint-plugin-i@latest
+        version: /eslint-plugin-i@2.28.1(eslint@8.51.0)
+      eslint-plugin-jsx-a11y:
+        specifier: ^6.7.1
+        version: 6.7.1(eslint@8.51.0)
+      eslint-plugin-promise:
+        specifier: ~6.1.1
+        version: 6.1.1(eslint@8.51.0)
+      eslint-plugin-react:
+        specifier: ~7.33.2
+        version: 7.33.2(eslint@8.51.0)
+      eslint-plugin-tsdoc:
+        specifier: ~0.2.17
+        version: 0.2.17
+      tslib:
+        specifier: ~2.6.2
+        version: 2.6.2
+      typescript:
+        specifier: ~5.2.2
+        version: 5.2.2
 
   ../../libraries/universal/object:
     dependencies:
