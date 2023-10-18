@@ -2,7 +2,7 @@
 import fs from 'fs-extra';
 import path from 'node:path';
 
-import type { TT$ } from '@upradata/util';
+import type { TT$ } from '@upradata/types';
 
 
 export interface ForEachFilesOptions {

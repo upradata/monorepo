@@ -119,7 +119,19 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@upradata/object",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@upradata/stats",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/string",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/template-string",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -132,6 +144,14 @@
     },
     {
       "name": "@upradata/ts",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@upradata/useful",
       "allowedCategories": [ "libraries" ]
     },
     {

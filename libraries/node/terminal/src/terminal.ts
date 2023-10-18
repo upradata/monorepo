@@ -1,5 +1,6 @@
-import { styles } from '@upradata/template-string-style';
-import { composeLeft, stringWidth, StyleTransformString } from '@upradata/util';
+import { stringWidth } from '@upradata/string';
+import { styles, StyleTransformString } from '@upradata/template-string-style';
+import { composeLeft } from '@upradata/useful';
 import { TableConfig, TableItem, TableRow, TableRows, TableString, TableStringOption } from './table';
 
 

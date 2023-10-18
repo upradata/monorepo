@@ -1,8 +1,10 @@
+import { styles as s, StyleTransformString } from '@upradata/template-string-style';
+import { assignRecursive } from '@upradata/useful';
 /* eslint-disable prefer-template */
 import { Argument, Command, Help } from 'commander';
-import { PartialRecursive, assignRecursive } from '@upradata/util';
-import { StyleTransformString, styles as s } from '@upradata/template-string-style';
 import { CliOption } from './cli.option';
+
+import type { PartialRecursive } from '@upradata/types';
 
 
 export type CliHelperStyles = {

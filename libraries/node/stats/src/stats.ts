@@ -1,8 +1,11 @@
+import { camelize } from '@upradata/string';
 import { styles as s } from '@upradata/template-string-style';
 import { Terminal } from '@upradata/terminal';
-import { CamelCase, camelize, isNumber } from '@upradata/util';
+import { isNumber } from '@upradata/useful';
 import { Stat, StatCtor, StatData } from './stat';
+import { statSorters } from './util';
 
+import type { CamelCase } from '@upradata/types';
 import type {
     OutputStats,
     SortData,
@@ -13,7 +16,6 @@ import type {
     StatsToStringOptions,
     StatTableWithName
 } from './types';
-import { statSorters } from './util';
 
 
 export class Stats<S extends Stat> {

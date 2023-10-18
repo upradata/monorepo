@@ -408,12 +408,12 @@
         //   "reviewCategory": "tools",
         //   "tags": [ "tools" ]
         // }
-        {
-            "packageName": "@upradata/util",
-            "projectFolder": "libraries/util",
-            "reviewCategory": "libraries",
-            "shouldPublish": true
-        },
+        // {
+        //     "packageName": "@upradata/util",
+        //     "projectFolder": "libraries/util",
+        //     "reviewCategory": "libraries",
+        //     "shouldPublish": true
+        // },
         {
             "packageName": "@upradata/node-util",
             "projectFolder": "libraries/node/node-util",
@@ -512,6 +512,42 @@
             "cyclicDependencyProjects": [
                 "@rushstack/heft-node-rig"
             ] */
+        },
+        {
+            "packageName": "@upradata/types",
+            "projectFolder": "libraries/universal/types",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/useful",
+            "projectFolder": "libraries/universal/useful",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/template-string",
+            "projectFolder": "libraries/universal/template-string",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/string",
+            "projectFolder": "libraries/universal/string",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/object",
+            "projectFolder": "libraries/universal/object",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "@upradata/util",
+            "projectFolder": "libraries/universal/util",
+            "reviewCategory": "libraries",
+            "shouldPublish": true
         }
     ]
 }

@@ -1,4 +1,4 @@
-import { ifthen, isDefinedProp } from '@upradata/util';
+import { ifthen, isDefinedProp } from '@upradata/useful';
 import { Option } from 'commander';
 import { camelcase } from './util';
 

@@ -1,4 +1,4 @@
-import { TT$ } from '@upradata/util';
+import type { TT$ } from '@upradata/types';
 
 export interface PollOptions {
     duration: number;

@@ -1,16 +1,10 @@
 /* eslint-disable object-shorthand */
 import { requireModule, RequireOptions } from '@upradata/module';
-import {
-    composeLeft,
-    isBoolean,
-    isNil,
-    isUndefined,
-    ObjectOf,
-    setRecursive,
-    stringToRegex
-} from '@upradata/util';
+import { setRecursive } from '@upradata/object';
+import { composeLeft, isBoolean, isNil, isUndefined, stringToRegex } from '@upradata/useful';
 import { InvalidArgumentError } from 'commander';
 
+import type { ObjectOf } from '@upradata/types';
 import type { AliasTransform, CliParserPrevious, CommanderParser, CommanderReducer, CommanderValueParser, ICliOption } from './cli.option.types';
 
 
@@ -46,7 +40,9 @@ const reduce = <R, V = string>(
 };
 
 
-const parseArray = <V = string>(parser?: CommanderValueParser<V>): CommanderParser<V[], V[]> => reduce([] as V[], (container, value) => container.concat(value), parser);
+const parseArray = <V = string>(parser?: CommanderValueParser<V>): CommanderParser<V[], V[]> => {
+    return reduce([] as V[], (container, value) => container.concat(value), parser);
+};
 
 export const parsers = {
     int: parseNumber('int'),

@@ -1,6 +1,6 @@
 import { fileExists } from '@upradata/fs';
 import { execAsync, ExecAsyncOptions, poll } from '@upradata/node-util';
-import { oneLineTrim } from '@upradata/util';
+import { oneLineTrim } from '@upradata/template-string-style';
 import path from 'node:path';
 import { absolutePath } from './util';
 

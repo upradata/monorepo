@@ -52,9 +52,10 @@
         "tsconfig-paths": "^4.0.0",
         "typescript": "~5.2.2",
         "types-tsconfig": "^2.0.2",
-        "@upradata/util": "workspace:*",
         "@upradata/find-up": "workspace:*",
-        "@upradata/fs": "workspace:*"
+        "@upradata/fs": "workspace:*",
+        "@upradata/useful": "workspace:*",
+        "@upradata/object": "workspace:*"
     },
     "devDependencies": {
         "@rushstack/heft": "0.62.3",

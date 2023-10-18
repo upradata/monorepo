@@ -1,4 +1,4 @@
-import { delayedPromise } from '@upradata/util';
+import { delayedPromise } from '@upradata/useful';
 import csvtojson from 'csvtojson';
 import { Fileline } from 'csvtojson/v2/fileline';
 import { CSVParseParam } from 'csvtojson/v2/Parameters';

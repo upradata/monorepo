@@ -1,5 +1,7 @@
-import { isDefined, isUndefined, ObjectOf } from '@upradata/util';
+import { isDefined, isUndefined } from '@upradata/useful';
 import fs from 'fs-extra';
+
+import type { ObjectOf } from '@upradata/types';
 
 
 export interface FilePrint {

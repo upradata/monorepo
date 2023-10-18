@@ -1,4 +1,4 @@
-import { ensureArray, isDefined, isUndefined } from '@upradata/util';
+import { ensureArray, isDefined, isUndefined } from '@upradata/useful';
 import { warn } from './common';
 import { File, GlobFiles } from './glob-files';
 import { CacheChangeOptions, Store, StoreOpts } from './store';

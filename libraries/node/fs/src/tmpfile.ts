@@ -1,8 +1,10 @@
 import { guid, SyncAsync } from '@upradata/node-util';
-import { stripIndents, TT$ } from '@upradata/util';
+import { stripIndents } from '@upradata/template-string';
 import fs from 'fs-extra';
 import os from 'node:os';
 import path from 'node:path';
+
+import type { TT$ } from '@upradata/types';
 
 
 const createTmpFileName = (mode: keyof SyncAsync, option: TmpFileOption = {}): TT$<string> => {

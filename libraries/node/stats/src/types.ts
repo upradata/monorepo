@@ -1,5 +1,5 @@
 import type { TableConfig, TableRow, TableRows } from '@upradata/terminal';
-import type { KebabCase, ObjectOf } from '@upradata/util';
+import type { KebabCase, ObjectOf } from '@upradata/types';
 import type { Stat } from './stat';
 
 

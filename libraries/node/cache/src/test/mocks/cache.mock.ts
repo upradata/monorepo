@@ -1,7 +1,8 @@
-import { AssignOptions, PartialRecursive, assignRecursive, ensureArray } from '@upradata/util';
+import { AssignOptions, assignRecursive, ensureArray } from '@upradata/useful';
 import VinylFile from 'vinyl';
 import { Cache, CacheOptions } from '../../cache';
 
+import type { PartialRecursive } from '@upradata/types';
 import type { CollectionObject } from '../../store-collection';
 import type { MockFSData } from './fs.mock';
 

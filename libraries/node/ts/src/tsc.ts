@@ -3,7 +3,7 @@
 // import type { TsConfig } from './tsconfig.json';
 
 import { createTmpDir } from '@upradata/fs';
-import { AssignOptions, assignRecursive } from '@upradata/util';
+import { AssignOptions, assignRecursive } from '@upradata/useful';
 import fs from 'fs-extra';
 import path from 'node:path';
 // import tsconfig from 'tsconfig';

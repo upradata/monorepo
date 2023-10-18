@@ -1,6 +1,6 @@
-import type { NonFunctionProperties, TT } from '@upradata/util';
 import { Option } from 'commander';
 
+import type { NonFunctionProperties, TT } from '@upradata/types';
 
 
 declare module 'commander' {

@@ -1,4 +1,4 @@
-import { assignRecursive, ensureArray, isPlainObject } from '@upradata/util';
+import { assignRecursive, ensureArray, isPlainObject } from '@upradata/useful';
 import { globSync, GlobOptions } from 'glob';
 import path from 'node:path';
 

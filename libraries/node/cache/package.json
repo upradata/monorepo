@@ -66,9 +66,9 @@
     "dependencies": {
         "@upradata/find-up": "workspace:*",
         "@upradata/template-string-style": "workspace:*",
-        "@upradata/util": "workspace:*",
         "fs-extra": "^11.1.1",
-        "glob": "^10.3.5"
+        "glob": "^10.3.5",
+        "@upradata/useful": "workspace:*"
     },
     "devDependencies": {
         "@rushstack/heft": "0.62.3",
@@ -79,6 +79,7 @@
         "@types/vinyl": "~2.0.7",
         "@upradata/eslint-config": "workspace:*",
         "@upradata/heft-node-rig": "workspace:*",
+        "@upradata/types": "workspace:*",
         "eslint-config-airbnb": "^19.0.4",
         "eslint-config-prettier": "^9.0.0",
         "eslint-define-config": "~1.24.1",

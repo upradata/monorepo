@@ -1,5 +1,6 @@
 import { SyncAsyncMode, SyncAsyncType } from '@upradata/node-util';
-import { ensureArray, isString, TT$ } from '@upradata/util';
+import { ensureArray, isString } from '@upradata/useful';
+import { TT$ } from '@upradata/types';
 import path from 'node:path';
 import { findFirstPath, FindFirstPathOpts } from './find-first-path';
 

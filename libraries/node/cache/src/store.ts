@@ -1,10 +1,12 @@
 import { findUpDir } from '@upradata/find-up';
-import { ensureArray, isDefined, isUndefined, PartialRecursive } from '@upradata/util';
+import { ensureArray, isDefined, isUndefined } from '@upradata/useful';
 import fs from 'fs-extra';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { warn } from './common';
 import { FileIteration, FilePrint, isFilePrint, StoreCollection } from './store-collection';
+
+import type { PartialRecursive } from '@upradata/types';
 
 
 const ENCODING = 'utf8';

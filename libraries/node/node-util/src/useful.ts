@@ -1,6 +1,8 @@
-import { type TypedArray, guidGenerator } from '@upradata/util';
+import { guidGenerator } from '@upradata/useful';
 import crypto from 'node:crypto';
 import path from 'node:path';
+
+import type { TypedArray } from '@upradata/types';
 
 
 const nodeEnv = (process.env.NODE_ENV || '').trim().toLowerCase();

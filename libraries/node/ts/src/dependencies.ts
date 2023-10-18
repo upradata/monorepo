@@ -1,4 +1,4 @@
-import { assignRecursive } from '@upradata/util';
+import { assignRecursive } from '@upradata/useful';
 import fs from 'fs-extra';
 import ts from 'typescript';
 import { defaultTscOptions } from './tsc';

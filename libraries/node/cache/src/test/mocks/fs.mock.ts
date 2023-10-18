@@ -1,5 +1,6 @@
-import { assignRecursive, Function2, ObjectOf } from '@upradata/util';
+import { assignRecursive } from '@upradata/useful';
 
+import type { Function2, ObjectOf } from '@upradata/types';
 import type FS from 'fs-extra';
 import type MemoryFS from 'memory-fs';
 import type VinylFile from 'vinyl';

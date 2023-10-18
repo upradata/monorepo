@@ -42,21 +42,11 @@
         "build:watch": "heft build-watch",
         "rebuild": "heft build --clean",
         "test": "heft test",
-        "clean": "shx rm -rf lib lib-esm",
-        "pre:build2": "npm run clean",
-        "build2": "concurrently 'tsc -p tsconfig.lib.json' 'tsc -p tsconfig.lib-esm.json'",
-        "post:build2": "npm run test && npm run e2e",
-        "copy:declaration": "cp -R src/@types lib/@types && cp -R src/@types lib-esm/@types",
-        "watch": "npm run build:watch",
-        "build2:watch": "concurrently 'tsc -p tsconfig.lib.json -w' 'tsc -p tsconfig.lib-esm.json -w' 'pnpm run copy:declaration'",
-        "test2": "jest --verbose false --config jest-ut.config.js",
         "e2e": "jest --passWithNoTests --verbose false --config jest-e2e.config.js",
         "github-push": "npm version patch && git pushall && git pushall-tags",
         "npm-publish": "npm run build && npm publish --access public"
     },
-    "dependencies": {
-        "@upradata/util": "workspace:*"
-    },
+    "dependencies": {"@upradata/useful":"workspace:*"},
     "devDependencies": {
         "@rushstack/heft": "0.62.3",
         "@types/fs-extra": "^11.0.2",
@@ -67,11 +57,11 @@
         "@upradata/find-up": "workspace:*",
         "@upradata/heft-node-rig": "workspace:*",
         "@upradata/stats": "workspace:*",
+        "@upradata/types": "workspace:*",
         "fs-extra": "^11.1.1",
         "memory-fs": "~0.5.0",
         "tslib": "~2.6.2",
-        "typescript": "~5.2.2",
-        "vinyl": "~3.0.0"
+        "typescript": "~5.2.2"
     },
     "publishConfig": {
         "access": "public"

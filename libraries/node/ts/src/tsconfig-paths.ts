@@ -1,6 +1,6 @@
 import type { TsConfig } from './tsconfig.json';
 
-import { map } from '@upradata/util';
+import { map } from '@upradata/object';
 import { dirname, isAbsolute, join } from 'node:path';
 import { register } from 'tsconfig-paths';
 import { getTsConfigJson, MergedTsConfigData } from './tsconfig';

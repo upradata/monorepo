@@ -1,6 +1,6 @@
 import { execAsync, ExecAsyncOptions, isExecLog } from '@upradata/node-util';
 import { green, oneLineTrim, yellow } from '@upradata/template-string-style';
-import { ifThen } from '@upradata/util';
+import { ifThen } from '@upradata/useful';
 import fs from 'fs-extra';
 import path from 'node:path';
 import { odsToXlsx, xlsxToCsv, XslxToCsvOption } from './ods-xlsx.convert';

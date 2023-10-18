@@ -1,24 +1,24 @@
 import {
     buildStyle,
     DefinedStringTransforms,
-    ensureArray,
-    makeObject,
     recreateString,
     Style,
     StyleOptions,
     styles as s,
     Styles,
-    StyleTransform,
-    ToString
-} from '@upradata/util';
+    StyleTransform
+} from '@upradata/template-string';
+import { ensureArray } from '@upradata/useful';
+import { makeObject } from '@upradata/object';
 import colorsStyles from 'colors/lib/styles';
 import { supportsColor } from 'colors/lib/system/supports-colors';
 import * as colorsSafe from 'colors/safe';
 
+import type { ToString } from '@upradata/types';
 import type { TerminalStyleNames } from './helpers/terminal-styles.type';
 
 
-export * from '@upradata/util/lib-esnext/template-string/export';
+export * from '@upradata/template-string/lib-esnext/export';
 type AllTerminalStyleNames = (keyof typeof colorsSafe) | TerminalStyleNames;
 type TerminalStyleStringTranforms = Record<AllTerminalStyleNames, StyleTransform> & { none: (s: string) => string; };
 

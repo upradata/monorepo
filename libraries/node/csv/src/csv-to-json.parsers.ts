@@ -1,3 +1,4 @@
+import { keys, makeObject } from '@upradata/object';
 import {
     compose,
     composeLeft,
@@ -6,14 +7,14 @@ import {
     isDefinedProp,
     isNil,
     isUndefined,
-    keys,
-    makeObject,
     mergeRegexes,
     MergeRexesOptions,
     regexToString
-} from '@upradata/util';
+} from '@upradata/useful';
 import { TransformOptions } from 'stream';
 import { csvToJson, CsvToJsonOpts } from './csv-json';
+
+
 // import { CellParser, ColumnParam } from 'csvtojson/v2/Parameters';
 
 // type CellParser = (item: string, head: string, resultRow: any, row: string[], columnIndex: number) => any

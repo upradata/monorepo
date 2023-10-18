@@ -1,4 +1,5 @@
-import { isArray, isPlainObject, entries } from '@upradata/util';
+import { isArray, isPlainObject } from '@upradata/useful';
+import { entries } from '@upradata/object';
 import { bold, styles as s } from '@upradata/template-string-style';
 
 

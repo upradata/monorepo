@@ -1,7 +1,7 @@
 import type { TsConfig } from './tsconfig.json';
 
 import { findUpDir } from '@upradata/find-up';
-import { assignRecursive, ensureArray } from '@upradata/util';
+import { assignRecursive, ensureArray } from '@upradata/useful';
 import path from 'node:path';
 import * as tsconfig from 'tsconfig';
 

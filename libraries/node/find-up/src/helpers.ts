@@ -1,4 +1,4 @@
-import { isUndefined } from '@upradata/util';
+import { isUndefined } from '@upradata/useful';
 import path from 'node:path';
 import { findUp, FindupOpts } from './find-up';
 

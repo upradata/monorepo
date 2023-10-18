@@ -4,7 +4,7 @@ import { CliOption } from './cli.option';
 import { CliHelper, type CliHelperOpts } from './helper';
 import { camelcase } from './util';
 
-import type { FunctionN, TT, TT$ } from '@upradata/util';
+import type { FunctionN, TT, TT$ } from '@upradata/types';
 import { Argument, Option, Command, CommanderError, OptionValueSource } from 'commander';
 import type { CliOptionInit, CommanderParser } from './cli.option.types';
 

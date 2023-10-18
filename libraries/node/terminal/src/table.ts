@@ -1,16 +1,11 @@
-import {
-    arrayN,
-    assignDefaultOption,
-    AssignOptions,
-    assignRecursive,
-    isDefined,
-    PartialRecursive,
-    stringWidth
-} from '@upradata/util';
+import { stringWidth } from '@upradata/string';
+import { arrayN, assignDefaultOption, AssignOptions, assignRecursive, isDefined } from '@upradata/useful';
 import { Alignment, table, TableUserConfig } from 'table';
 import * as alignString from 'table/dist/src/alignString.js';
 import * as calculateCellWidths from 'table/dist/src/calculateMaximumColumnWidths';
 import { makeTableConfig } from 'table/dist/src/makeTableConfig';
+
+import type { PartialRecursive } from '@upradata/types';
 
 
 type RemoveReadOnly<T> = {

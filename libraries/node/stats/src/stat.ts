@@ -1,6 +1,5 @@
-import { ObjectOf } from '@upradata/util';
-
 import type { TableRow, TableRows } from '@upradata/terminal';
+import type { ObjectOf } from '@upradata/types';
 
 
 export type StatType = 'global' | 'detailed';
