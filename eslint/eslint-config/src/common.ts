@@ -42,6 +42,7 @@ export const buildRules = (profile: Profile) => defineConfig({
     ],
     parserOptions: {
         // ecmaVersion: 2015,
+        ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: {
             impliedStrict: true,
