@@ -44,18 +44,18 @@ export function isErrorOf(e: any, errorCtor: Constructor) {
 }
 
 
-/* export function ensureArray<T extends TT<any>>(v: T): T extends Arr<any> ? T : T[] {
-    return (isArray(v) ? v : isDefined(v) ? [ v ] : []) as any;
-} */
+
 /**
  * Ensures that a value is an array, wrapping it in an array if it is not already an array.
  * @param v - The value to ensure as an array.
  * @returns An array containing the value, or the original array if it is already an array.
  */
-export function ensureArray<T>(v: T): T extends Arr<any, 'readonly'> ? T : T[] {
-    return (isArray(v) ? v : isDefined(v) ? [ v ] : []) as any;
-}
+export function ensureArray<T, ValueCanBeUndefined extends boolean = false>(
+    v: T, options?: { valueCanBeUndefined?: ValueCanBeUndefined; }
+): T extends Arr<any, 'readonly'> ? T : Array<ValueCanBeUndefined extends true ? T : Exclude<T, undefined>> {
 
+    return (isArray(v) ? v : isDefined(v) || options?.valueCanBeUndefined ? [ v ] : []) as any;
+}
 
 /**
  * Ensures that a value is an array, wrapping it in an array if it is not already an array.

@@ -3,6 +3,14 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "@mailchimp/mailchimp_marketing",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@mailchimp/mailchimp_transactional",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@mxssfd/typedoc-theme",
       "allowedCategories": [ "libraries" ]
     },
@@ -60,6 +68,14 @@
     },
     {
       "name": "@schemastore/package",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@sendgrid/client",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@sendgrid/mail",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -251,11 +267,19 @@
       "allowedCategories": [ "libraries", "rush" ]
     },
     {
+      "name": "form-data",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "fs-extra",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "glob",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "html-minifier-terser",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -276,6 +300,10 @@
     },
     {
       "name": "locate-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "mailgun.js",
       "allowedCategories": [ "libraries" ]
     },
     {

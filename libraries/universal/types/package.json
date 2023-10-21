@@ -40,12 +40,11 @@
         "github-push": "npm run build && npm version patch && git pushall && git pushall-tags",
         "npm-publish": "npm run build && npm publish --access public"
     },
-    "dependencies": {},
     "devDependencies": {
         "@rushstack/heft": "0.62.3",
-        "@types/heft-jest": "1.0.4",
-        "@types/memory-fs": "~0.3.4",
-        "@types/node": "20.8.4",
+        "@types/heft-jest": "1.0.5",
+        "@types/memory-fs": "~0.3.6",
+        "@types/node": "20.8.7",
         "@upradata/eslint-config": "workspace:*",
         "@upradata/heft-node-rig": "workspace:*",
         "eslint-config-airbnb": "^19.0.4",

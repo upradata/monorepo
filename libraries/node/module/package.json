@@ -56,8 +56,8 @@
     },
     "devDependencies": {
         "@rushstack/heft": "0.62.3",
-        "@types/fs-extra": "^11.0.2",
-        "@types/node": "20.8.4",
+        "@types/fs-extra": "^11.0.3",
+        "@types/node": "20.8.7",
         "@upradata/eslint-config": "workspace:*",
         "@upradata/heft-node-rig": "workspace:*",
         "eslint-config-airbnb": "^19.0.4",
