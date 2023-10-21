@@ -1,0 +1,94 @@
+{
+    "name": "@upradata/email",
+    "author": {
+        "name": "El Pupi (Upra-Data)",
+        "email": "elpupi@upradata.com",
+        "url": "https://github.com/upradata"
+    },
+    "repository": {
+        "url": "https://github.com/upradata/email.git"
+    },
+    "license": "MIT",
+    "version": "2.0.0",
+    "description": "Utility to parse command line arguments on top of commander",
+    "sideEffects": false,
+    "esm": {
+        "mainFields": [
+            "module",
+            "main"
+        ]
+    },
+    "main": "lib-es6",
+    "types": "lib-esnext",
+    "module": "lib-esnext",
+    "files": [
+        "lib-es5",
+        "lib-es6",
+        "lib-esnext"
+    ],
+    "exports": {
+        "./*": {
+            "import": "./lib-esnext/*",
+            "require": "./lib-es6/*",
+            "types": "./lib-esnext/*"
+        },
+        ".": {
+            "import": "./lib-esnext/index.js",
+            "require": "./lib-es6/index.js"
+        }
+    },
+    "scripts": {
+        "build": "heft build",
+        "build:watch": "heft build-watch",
+        "rebuild": "heft build --clean",
+        "test": "heft test",
+        "e2e": "jest --passWithNoTests --verbose false --config jest-e2e.config.js",
+        "github-push": "npm version patch && git pushall && git pushall-tags",
+        "npm-publish": "npm run build && npm publish --access public"
+    },
+    "dependencies": {
+        "@mailchimp/mailchimp_marketing": "^3.0.80",
+        "@mailchimp/mailchimp_transactional": "^1.0.50",
+        "@sendgrid/client": "^7.7.0",
+        "@sendgrid/mail": "^7.7.0",
+        "@upradata/csv": "workspace:*",
+        "@upradata/find-up": "workspace:*",
+        "@upradata/fs": "workspace:*",
+        "@upradata/module": "workspace:*",
+        "@upradata/object": "workspace:*",
+        "@upradata/template-string-style": "workspace:*",
+        "@upradata/useful": "workspace:*",
+        "form-data": "^4.0.0",
+        "fs-extra": "^11.1.1",
+        "html-minifier-terser": "~7.2.0",
+        "mailgun.js": "^9.3.0",
+        "@upradata/string": "workspace:*",
+        "@upradata/terminal": "workspace:*"
+    },
+    "devDependencies": {
+        "@rushstack/heft": "0.62.3",
+        "@types/fs-extra": "^11.0.3",
+        "@types/html-minifier-terser": "~7.0.1",
+        "@types/mailchimp__mailchimp_transactional": "^1.0.5",
+        "@types/node": "20.8.7",
+        "@upradata/eslint-config": "workspace:*",
+        "@upradata/heft-node-rig": "workspace:*",
+        "@upradata/types": "workspace:*",
+        "eslint-config-airbnb": "^19.0.4",
+        "eslint-config-prettier": "^9.0.0",
+        "eslint-define-config": "~1.24.1",
+        "eslint-import-resolver-exports": "1.0.0-beta.5",
+        "eslint-import-resolver-typescript": "~3.6.1",
+        "eslint-plugin-import": "^2.28.1",
+        "eslint-plugin-jsx-a11y": "^6.7.1",
+        "eslint-plugin-promise": "~6.1.1",
+        "eslint-plugin-react": "~7.33.2",
+        "eslint-plugin-tsdoc": "~0.2.17",
+        "tslib": "~2.6.2",
+        "typescript": "~5.2.2"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "peersDependencies": {}
+}

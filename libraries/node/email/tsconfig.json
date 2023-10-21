@@ -1,0 +1,12 @@
+{
+    "extends": "./node_modules/@upradata/heft-node-rig/profiles/default/tsconfig.ide.json",
+    "compilerOptions": {
+        "typeRoots": [
+            "./node_modules/@types",
+            "./src/@types"
+        ]
+    },
+    "include": [
+        "src/**/*"
+    ]
+}
